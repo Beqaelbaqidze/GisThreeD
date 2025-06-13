@@ -204,17 +204,18 @@ for (let entity of entities) {
     entity.polygon.extrudedHeight = base + height;
     entity.polygon.material = Cesium.Color.BROWN.withAlpha(0.8);
 
-    viewer.entities.add({
+    const newEntity = viewer.entities.add({
       polygon: {
         hierarchy: hierarchy,
         height: entity.polygon.extrudedHeight,
         extrudedHeight: entity.polygon.height + baseHeight,
         material: Cesium.Color.GRAY.withAlpha(0.8),
-        properties: entity.properties,
+     
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       }
     });
+    newEntity.polygon.properties = entity.properties;
 
   } else if (sub.includes("fan")) {
     const middleStart = base + ((baseHeight - height) / 2) + 0.3;
@@ -224,7 +225,7 @@ for (let entity of entities) {
     entity.polygon.extrudedHeight = middleEnd;
     entity.polygon.material = Cesium.Color.AQUA.withAlpha(0.8);
 
-    viewer.entities.add({
+    const newEntityDown = viewer.entities.add({
       polygon: {
         hierarchy: hierarchy,
         height: middleEnd,
@@ -232,12 +233,12 @@ for (let entity of entities) {
         material: Cesium.Color.GRAY.withAlpha(0.8),
         outline: true,
         outlineColor: Cesium.Color.YELLOW,
-        properties: entity.properties
+       
 
       }
     });
 
-    viewer.entities.add({
+    const newEntityUp = viewer.entities.add({
       polygon: {
         hierarchy: hierarchy,
         height: base,
@@ -245,9 +246,11 @@ for (let entity of entities) {
         material: Cesium.Color.GRAY.withAlpha(0.8),
         outline: true,
         outlineColor: Cesium.Color.YELLOW,
-        properties: entity.properties
+    
       }
     });
+    newEntityDown.polygon.properties = entity.properties;
+    newEntityUp.polygon.properties = entity.properties;
 
   } else if (sub.includes("iat") || sub.includes("aiv")) {
     console.log("SubType:", sub, "Base Height:", baseHeight, "Object Height:", height);
