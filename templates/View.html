@@ -91,12 +91,12 @@
     const tree = {};
 
     for (const f of features) {
-      const { CADCODE = "?", UNIT_CODE = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
+      const { CADCODE = "?", REG_N = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
       if (!tree[CADCODE]) tree[CADCODE] = {};
-      if (!tree[CADCODE][UNIT_CODE]) tree[CADCODE][UNIT_CODE] = {};
-      if (!tree[CADCODE][UNIT_CODE][FLOOR]) tree[CADCODE][UNIT_CODE][FLOOR] = {};
-      if (!tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE]) tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE] = new Set();
-      tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE].add(SUB_TYPE);
+      if (!tree[CADCODE][REG_N]) tree[CADCODE][REG_N] = {};
+      if (!tree[CADCODE][REG_N][FLOOR]) tree[CADCODE][REG_N][FLOOR] = {};
+      if (!tree[CADCODE][REG_N][FLOOR][UNIT_TYPE]) tree[CADCODE][REG_N][FLOOR][UNIT_TYPE] = new Set();
+      tree[CADCODE][REG_N][FLOOR][UNIT_TYPE].add(SUB_TYPE);
     }
 
     const container = document.getElementById("customTree");
