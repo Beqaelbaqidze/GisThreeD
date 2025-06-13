@@ -271,11 +271,15 @@ for (let entity of entities) {
     entity.polygon.material = Cesium.Color.PINK.withAlpha(0.8);
 
   } else {
-    entity.polygon.height = base;
-    entity.polygon.extrudedHeight = base + height;
-    entity.polygon.material = Cesium.Color.RED.withAlpha(1);
-    entity.polygon.properties.SUB_TYPE = "Unknown";
-  }
+  entity.polygon.height = base;
+  entity.polygon.extrudedHeight = base + height;
+  entity.polygon.material = Cesium.Color.RED.withAlpha(1);
+  
+  // Set or update properties correctly
+  entity.properties = entity.properties || new Cesium.PropertyBag();
+  entity.properties.SUB_TYPE = new Cesium.ConstantProperty("Unknown");
+}
+
 }
 
 
