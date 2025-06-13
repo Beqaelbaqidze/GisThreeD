@@ -6,11 +6,6 @@
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
-
-  <!-- jsTree -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
-
   <style>
     html, body {
       margin: 0;
@@ -30,14 +25,19 @@
     }
     #sidebar {
       width: 300px;
-      background: #f4f4f4;
+      background: #f9f9f9;
       overflow-y: auto;
       border-left: 1px solid #ccc;
       padding: 10px;
+      font-size: 14px;
     }
-    canvas {
-      background: white !important;
-    }
+    ul { padding-left: 20px; list-style-type: none; }
+    li { margin: 2px 0; cursor: pointer; }
+    .level1 { font-weight: bold; }
+    .level2 { padding-left: 10px; }
+    .level3 { padding-left: 20px; }
+    .level4 { padding-left: 30px; }
+    .level5 { padding-left: 40px; }
   </style>
 </head>
 <body>
@@ -45,7 +45,7 @@
   <div id="cesiumContainer"></div>
   <div id="sidebar">
     <h4>GeoJSON Structure</h4>
-    <div id="jstree-panel"></div>
+    <div id="customTree"></div>
   </div>
 </div>
 
@@ -71,41 +71,6 @@
   viewer.scene.backgroundColor = Cesium.Color.WHITE;
   proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
 
-  function buildJsTreeData(features) {
-    const treeData = [];
-    const treeMap = {};
-
-    features.forEach(f => {
-      const props = f.properties;
-      const cad = props.CADCODE || "Unknown";
-      const unit = props.UNIT_CODE || "Unknown";
-      const floor = String(props.FLOOR || "Unknown");
-      const unitType = props.UNIT_TYPE || "Unknown";
-      const subType = props.SUB_TYPE || "Unknown";
-
-      const path = [
-        [cad, `cad:${cad}`],
-        [unit, `${cad}:${unit}`],
-        [floor, `${cad}:${unit}:${floor}`],
-        [unitType, `${cad}:${unit}:${floor}:${unitType}`],
-        [subType, `${cad}:${unit}:${floor}:${unitType}:${subType}`]
-      ];
-
-      path.forEach((item, i) => {
-        const text = item[0];
-        const id = item[1];
-        const parent = i === 0 ? "#" : path[i - 1][1];
-        if (!treeMap[id]) {
-          const node = { id, parent, text };
-          treeData.push(node);
-          treeMap[id] = true;
-        }
-      });
-    });
-
-    return treeData;
-  }
-
   function reprojectGeoJSON(geojson) {
     return {
       type: "FeatureCollection",
@@ -122,97 +87,135 @@
     };
   }
 
+  function buildManualTree(features) {
+    const tree = {};
+
+    for (const f of features) {
+      const { CADCODE = "?", UNIT_CODE = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
+      if (!tree[CADCODE]) tree[CADCODE] = {};
+      if (!tree[CADCODE][UNIT_CODE]) tree[CADCODE][UNIT_CODE] = {};
+      if (!tree[CADCODE][UNIT_CODE][FLOOR]) tree[CADCODE][UNIT_CODE][FLOOR] = {};
+      if (!tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE]) tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE] = new Set();
+      tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE].add(SUB_TYPE);
+    }
+
+    const container = document.getElementById("customTree");
+    const ul = document.createElement("ul");
+
+    for (const cadcode in tree) {
+      const liCad = document.createElement("li");
+      liCad.textContent = cadcode;
+      liCad.classList.add("level1");
+      const ulUnit = document.createElement("ul");
+
+      for (const unit in tree[cadcode]) {
+        const liUnit = document.createElement("li");
+        liUnit.textContent = unit;
+        liUnit.classList.add("level2");
+        const ulFloor = document.createElement("ul");
+
+        for (const floor in tree[cadcode][unit]) {
+          const liFloor = document.createElement("li");
+          liFloor.textContent = "Floor: " + floor;
+          liFloor.classList.add("level3");
+          const ulType = document.createElement("ul");
+
+          for (const unitType in tree[cadcode][unit][floor]) {
+            const liType = document.createElement("li");
+            liType.textContent = unitType;
+            liType.classList.add("level4");
+            const ulSub = document.createElement("ul");
+
+            for (const subType of tree[cadcode][unit][floor][unitType]) {
+              const liSub = document.createElement("li");
+              liSub.textContent = subType;
+              liSub.classList.add("level5");
+              ulSub.appendChild(liSub);
+            }
+
+            liType.appendChild(ulSub);
+            ulType.appendChild(liType);
+          }
+
+          liFloor.appendChild(ulType);
+          ulFloor.appendChild(liFloor);
+        }
+
+        liUnit.appendChild(ulFloor);
+        ulUnit.appendChild(liUnit);
+      }
+
+      liCad.appendChild(ulUnit);
+      ul.appendChild(liCad);
+    }
+
+    container.appendChild(ul);
+  }
+
   function processGeoJSON(data) {
     const reprojected = reprojectGeoJSON(data);
     Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
       viewer.dataSources.add(dataSource);
       viewer.zoomTo(dataSource);
 
+      buildManualTree(reprojected.features);
+
       const entities = dataSource.entities.values;
-      const jsTreeData = buildJsTreeData(reprojected.features);
-      $('#jstree-panel').jstree({ 'core': { 'data': jsTreeData } });
-
       let baseHeight = 0;
-      let stairCountsPerFloor = {};
 
       for (let entity of entities) {
         if (!entity.polygon) continue;
-        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
-        const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-        if (subType.toLowerCase() === "kedeli") baseHeight = height;
+        const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
+        const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+        if (sub.toLowerCase() === "kedeli") baseHeight = h;
       }
 
       for (let entity of entities) {
         if (!entity.polygon) continue;
-        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
-        const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-        if (subType.toLowerCase() === "kibis ujredi") {
-          stairCountsPerFloor[floor] = (stairCountsPerFloor[floor] || 0) + 1;
-        }
-      }
-
-      for (let entity of entities) {
-        if (!entity.polygon) continue;
-        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
-        const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-        const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-        const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+        const sub = (entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "").toLowerCase();
+        const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+        const floor = parseInt(entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0);
         const base = baseHeight * (floor - 1);
 
-        switch (subType.toLowerCase()) {
+        const poly = entity.polygon;
+        switch (sub) {
           case "kedeli":
           case "kolona":
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + height;
-            entity.polygon.material = Cesium.Color.GRAY.withAlpha(0.8);
+            poly.height = base;
+            poly.extrudedHeight = base + h;
+            poly.material = Cesium.Color.GRAY.withAlpha(0.8);
             break;
-
-          case "karebi":
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + height;
-            entity.polygon.material = Cesium.Color.BROWN.withAlpha(0.8);
-            viewer.entities.add({
-              polygon: {
-                hierarchy,
-                height: entity.polygon.extrudedHeight,
-                extrudedHeight: base + baseHeight,
-                material: Cesium.Color.GRAY.withAlpha(0.8),
-                outline: true,
-                outlineColor: Cesium.Color.YELLOW
-              }
-            });
-            break;
-
           case "fanjara":
-            entity.polygon.height = base + ((baseHeight - height) / 2) + 0.3;
-            entity.polygon.extrudedHeight = entity.polygon.height + height;
-            entity.polygon.material = Cesium.Color.AQUA.withAlpha(0.8);
+            poly.height = base + ((baseHeight - h) / 2) + 0.3;
+            poly.extrudedHeight = poly.height + h;
+            poly.material = Cesium.Color.AQUA.withAlpha(0.8);
             break;
-
           case "iataki":
           case "aivani":
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + 0.1;
-            entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.5);
+            poly.height = base;
+            poly.extrudedHeight = base + 0.1;
+            poly.material = Cesium.Color.BLACK.withAlpha(0.5);
             break;
-
           case "kibis ujredi":
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + 0.3;
-            entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.8);
+            poly.height = base;
+            poly.extrudedHeight = base + 0.3;
+            poly.material = Cesium.Color.BLUE.withAlpha(0.8);
             viewer.entities.remove(entity);
             break;
-
           case "liftis saxta":
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + baseHeight;
-            entity.polygon.material = Cesium.Color.PINK.withAlpha(0.8);
+            poly.height = base;
+            poly.extrudedHeight = base + baseHeight;
+            poly.material = Cesium.Color.PINK.withAlpha(0.8);
             break;
-
+          case "karebi":
+            poly.height = base;
+            poly.extrudedHeight = base + h;
+            poly.material = Cesium.Color.BROWN.withAlpha(0.8);
+            break;
           default:
-            entity.polygon.height = base;
-            entity.polygon.extrudedHeight = base + height;
-            entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.8);
+            poly.height = base;
+            poly.extrudedHeight = base + h;
+            poly.material = Cesium.Color.BLACK.withAlpha(0.8);
         }
       }
     });
