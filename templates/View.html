@@ -6,140 +6,45 @@
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
   <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: "Segoe UI", Roboto, sans-serif;
-  }
-
-  #mainContainer {
-    display: flex;
-    height: 100%;
-    width: 100%;
-  }
-
-  #cesiumContainer {
-    flex-grow: 1;
-    background: white;
-  }
-
-  #sidebar {
-    width: 340px;
-    background: #1e1e1e;
-    color: #f0f0f0;
-    overflow-y: auto;
-    border-left: 2px solid #333;
-    padding: 20px 15px;
-    box-sizing: border-box;
-    font-size: 14px;
-  }
-
-  #sidebar h4 {
-    margin: 0 0 15px;
-    font-size: 18px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
-    color: #61dafb;
-  }
-
-  ul {
-    padding-left: 0;
-    margin: 0;
-  }
-
-  li {
-    list-style: none;
-    margin-bottom: 6px;
-    position: relative;
-    padding-left: 22px;
-  }
-
-  li::before {
-    content: "▶";
-    color: #888;
-    position: absolute;
-    left: 0;
-    font-size: 12px;
-    top: 2px;
-  }
-
-  li.level5::before {
-    content: "";
-  }
-
-  li.level1 {
-    font-weight: bold;
-    color: #ffffff;
-  }
-
-  li.level2 {
-    color: #cccccc;
-    font-weight: 500;
-  }
-
-  li.level3 {
-    color: #aaaaaa;
-  }
-
-  li.level4 {
-    color: #999999;
-  }
-
-  li.level5 {
-    padding-left: 0;
-  }
-
-  .level5 input[type="checkbox"] {
-    margin-right: 5px;
-    accent-color: #61dafb;
-    transform: scale(1.2);
-    vertical-align: middle;
-  }
-
-  .level5 label {
-    cursor: pointer;
-    vertical-align: middle;
-  }
-
-  .level5:hover label {
-    color: #61dafb;
-  }
-
-  /* Scrollbar Styling */
-  #sidebar::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  #sidebar::-webkit-scrollbar-track {
-    background: #1e1e1e;
-  }
-
-  #sidebar::-webkit-scrollbar-thumb {
-    background-color: #555;
-    border-radius: 4px;
-  }
-
-  #sidebar::-webkit-scrollbar-thumb:hover {
-    background: #777;
-  }
-</style>
-
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+    #mainContainer { display: flex; height: 100%; width: 100%; }
+    #cesiumContainer { flex-grow: 1; background: white; }
+    #sidebar {
+      width: 340px;
+      background: #1e1e1e;
+      color: #f0f0f0;
+      overflow-y: auto;
+      border-left: 2px solid #333;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #sidebar h4 {
+      margin: 10px 0;
+      font-size: 18px;
+      color: #61dafb;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    .jstree-anchor { color: #ddd !important; }
+    #sidebar::-webkit-scrollbar { width: 6px; }
+    #sidebar::-webkit-scrollbar-thumb { background-color: #444; }
+    #sidebar::-webkit-scrollbar-thumb:hover { background: #888; }
+  </style>
 </head>
 <body>
 <div id="mainContainer">
   <div id="cesiumContainer"></div>
   <div id="sidebar">
     <h4>GeoJSON Structure</h4>
-    <div id="customTree"></div>
+    <div id="jstree-panel"></div>
   </div>
 </div>
-
 <script>
   const inputGeojson = {{ geojson_data | safe }};
-
   const viewer = new Cesium.Viewer("cesiumContainer", {
     animation: false,
     timeline: false,
@@ -155,11 +60,10 @@
     fullscreenButton: false,
     sceneMode: Cesium.SceneMode.SCENE3D
   });
-
   viewer.scene.backgroundColor = Cesium.Color.WHITE;
   proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
 
-  const subtypeEntityMap = {}; // Stores subtype → [entities]
+  const subtypeEntityMap = {}; // subtype → [entities]
 
   function reprojectGeoJSON(geojson) {
     return {
@@ -177,86 +81,59 @@
     };
   }
 
-  function buildManualTree(features) {
-    const tree = {};
-
+  function buildJsTreeData(features) {
+    const treeData = [];
+    const idSet = new Set();
     for (const f of features) {
-      const { CADCODE = "?", REG_N = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
-      if (!tree[CADCODE]) tree[CADCODE] = {};
-      if (!tree[CADCODE][REG_N]) tree[CADCODE][REG_N] = {};
-      if (!tree[CADCODE][REG_N][FLOOR]) tree[CADCODE][REG_N][FLOOR] = {};
-      if (!tree[CADCODE][REG_N][FLOOR][UNIT_TYPE]) tree[CADCODE][REG_N][FLOOR][UNIT_TYPE] = new Set();
-      tree[CADCODE][REG_N][FLOOR][UNIT_TYPE].add(SUB_TYPE);
-    }
+      const p = f.properties;
+      const CADCODE = p.CADCODE || "??";
+      const REG_N = p.REG_N || "??";
+      const FLOOR = String(p.FLOOR || "??");
+      const UNIT_TYPE = p.UNIT_TYPE || "??";
+      const SUB_TYPE = p.SUB_TYPE || "??";
 
-    const container = document.getElementById("customTree");
-    const ul = document.createElement("ul");
+      const ids = [
+        `cad:${CADCODE}`,
+        `cad:${CADCODE}/reg:${REG_N}`,
+        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}`,
+        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${UNIT_TYPE}`,
+        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${UNIT_TYPE}/subtype:${SUB_TYPE}`
+      ];
 
-    for (const cadcode in tree) {
-      const liCad = document.createElement("li");
-      liCad.textContent = cadcode;
-      liCad.classList.add("level1");
-      const ulUnit = document.createElement("ul");
+      const texts = [CADCODE, REG_N, `Floor ${FLOOR}`, UNIT_TYPE, SUB_TYPE];
 
-      for (const unit in tree[cadcode]) {
-        const liUnit = document.createElement("li");
-        liUnit.textContent = unit;
-        liUnit.classList.add("level2");
-        const ulFloor = document.createElement("ul");
-
-        for (const floor in tree[cadcode][unit]) {
-          const liFloor = document.createElement("li");
-          liFloor.textContent = "Floor: " + floor;
-          liFloor.classList.add("level3");
-          const ulType = document.createElement("ul");
-
-          for (const unitType in tree[cadcode][unit][floor]) {
-            const liType = document.createElement("li");
-            liType.textContent = unitType;
-            liType.classList.add("level4");
-            const ulSub = document.createElement("ul");
-
-            for (const subType of tree[cadcode][unit][floor][unitType]) {
-              const liSub = document.createElement("li");
-              liSub.classList.add("level5");
-
-              const checkbox = document.createElement("input");
-              checkbox.type = "checkbox";
-              checkbox.checked = true;
-              checkbox.dataset.subtype = subType;
-              checkbox.addEventListener("change", e => {
-                const type = e.target.dataset.subtype;
-                const visible = e.target.checked;
-                if (subtypeEntityMap[type]) {
-                  subtypeEntityMap[type].forEach(ent => ent.show = visible);
-                }
-              });
-
-              const label = document.createElement("label");
-              label.textContent = " " + subType;
-
-              liSub.appendChild(checkbox);
-              liSub.appendChild(label);
-              ulSub.appendChild(liSub);
-            }
-
-            liType.appendChild(ulSub);
-            ulType.appendChild(liType);
-          }
-
-          liFloor.appendChild(ulType);
-          ulFloor.appendChild(liFloor);
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const parent = i === 0 ? "#" : ids[i - 1];
+        if (!idSet.has(id)) {
+          idSet.add(id);
+          treeData.push({ id, parent, text: texts[i], state: { opened: true } });
         }
-
-        liUnit.appendChild(ulFloor);
-        ulUnit.appendChild(liUnit);
       }
-
-      liCad.appendChild(ulUnit);
-      ul.appendChild(liCad);
     }
+    return treeData;
+  }
 
-    container.appendChild(ul);
+  function initializeJsTree(treeData) {
+    $('#jstree-panel').jstree('destroy');
+    $('#jstree-panel').jstree({
+      'core': { 'data': treeData, 'themes': { 'stripes': true } },
+      'plugins': ["checkbox"]
+    });
+
+    $('#jstree-panel').on('changed.jstree', function (e, data) {
+      const visibleSubtypes = new Set();
+      data.selected.forEach(id => {
+        if (id.includes("subtype:")) {
+          const subtype = id.split("subtype:")[1];
+          visibleSubtypes.add(subtype);
+        }
+      });
+      for (const subtype in subtypeEntityMap) {
+        const visible = visibleSubtypes.has(subtype);
+        subtypeEntityMap[subtype].forEach(ent => ent.show = visible);
+      }
+    });
   }
 
   function processGeoJSON(data) {
@@ -264,19 +141,13 @@
     Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
       viewer.dataSources.add(dataSource);
       viewer.zoomTo(dataSource);
-
-      buildManualTree(reprojected.features);
-
       const entities = dataSource.entities.values;
       let baseHeight = 0;
-
       for (let entity of entities) {
-        if (!entity.polygon) continue;
         const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
         const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
         if (sub.toLowerCase() === "kedeli") baseHeight = h;
       }
-
       for (let entity of entities) {
         if (!entity.polygon) continue;
         const sub = (entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "").toLowerCase();
@@ -284,11 +155,8 @@
         const floor = parseInt(entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0);
         const base = baseHeight * (floor - 1);
         const poly = entity.polygon;
-
-        // Save by subtype
         if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
         subtypeEntityMap[sub].push(entity);
-
         switch (sub) {
           case "kedeli":
           case "kolona":
@@ -329,6 +197,8 @@
             poly.material = Cesium.Color.BLACK.withAlpha(0.8);
         }
       }
+      const treeData = buildJsTreeData(reprojected.features);
+      initializeJsTree(treeData);
     });
   }
 
