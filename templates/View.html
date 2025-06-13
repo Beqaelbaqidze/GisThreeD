@@ -239,7 +239,7 @@ function processGeoJSON(data) {
 
       } else if (sub.includes("fan")) {
         const middleStart = base + ((baseHeight - height) / 2) + 0.3;
-        const middleEnd = middleStart + height + 0.3;
+        const middleEnd = middleStart + height;
 
         entity.polygon.height = middleStart;
         entity.polygon.extrudedHeight = middleEnd;
@@ -250,7 +250,7 @@ function processGeoJSON(data) {
           polygon: {
             hierarchy: hierarchy,
             height: middleEnd,
-            extrudedHeight: middleEnd + 0.3,
+            extrudedHeight: middleEnd + ((baseHeight - height) / 2) - 0.3,
             material: Cesium.Color.GRAY.withAlpha(0.8),
             outline: true,
             outlineColor: Cesium.Color.YELLOW
