@@ -214,9 +214,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties:{
-        SUB_TYPE: "kedeli"
-      }
+       properties: new Cesium.PropertyBag({
+    SUB_TYPE: new Cesium.ConstantProperty("kedeli")
+  })
     });
 
   } else if (sub.includes("fan")) {
@@ -237,9 +237,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties:{
-        SUB_TYPE: "kedeli"
-      }
+       properties: new Cesium.PropertyBag({
+    SUB_TYPE: new Cesium.ConstantProperty("kedeli")
+  })
     });
 
     viewer.entities.add({
@@ -252,9 +252,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties:{
-        SUB_TYPE: "kedeli"
-      }
+      properties: new Cesium.PropertyBag({
+    SUB_TYPE: new Cesium.ConstantProperty("kedeli")
+  })
     });
 
   } else if (sub.includes("iat") || sub.includes("aiv")) {
