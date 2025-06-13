@@ -89,18 +89,18 @@
       const CADCODE = p.CADCODE || "??";
       const REG_N = p.REG_N || "??";
       const FLOOR = String(p.FLOOR || "??");
-      const UNIT_TYPE = p.UNIT_TYPE || "??";
+      const TYPE = p.TYPE || "??";
       const SUB_TYPE = p.SUB_TYPE || "??";
 
       const ids = [
         `cad:${CADCODE}`,
         `cad:${CADCODE}/reg:${REG_N}`,
         `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}`,
-        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${UNIT_TYPE}`,
-        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${UNIT_TYPE}/subtype:${SUB_TYPE}`
+        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${TYPE}`,
+        `cad:${CADCODE}/reg:${REG_N}/floor:${FLOOR}/type:${TYPE}/subtype:${SUB_TYPE}`
       ];
 
-      const texts = [CADCODE, REG_N, `Floor ${FLOOR}`, UNIT_TYPE, SUB_TYPE];
+      const texts = [CADCODE, REG_N, `Floor ${FLOOR}`, TYPE, SUB_TYPE];
 
       for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
