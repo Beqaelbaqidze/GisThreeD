@@ -163,159 +163,148 @@
           });
         }
 
-      function processGeoJSON(data) {
-        const reprojected = reprojectGeoJSON(data);
-        Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
-          viewer.dataSources.add(dataSource);
-          viewer.zoomTo(dataSource);
+function processGeoJSON(data) {
+  const reprojected = reprojectGeoJSON(data);
+  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+    viewer.dataSources.add(dataSource);
+    viewer.zoomTo(dataSource);
 
-          let baseHeight = 0;
-          let stairCountsPerFloor = {};
-          const entities = dataSource.entities.values;
+    const subtypeEntityMap = {};
+    const entities = dataSource.entities.values;
+    let baseHeight = 0;
+    let stairCountsPerFloor = {};
 
-          // Step 1: Get baseHeight from kedeli
-          for (let entity of entities) {
-            if (!entity.polygon) continue;
-
-            const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
-            if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-            subtypeEntityMap[sub].push(entity);
-
-            const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-            if (sub.includes("ked")) {
-              baseHeight = height;
-            }
-          }
-
-          // Step 2: Count staircases per floor
-          for (let entity of entities) {
-            if (!entity.polygon) continue;
-
-            const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
-            const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-
-            if (sub.includes("kib")) {
-              if (!stairCountsPerFloor[floor]) {
-                stairCountsPerFloor[floor] = 0;
-              }
-              stairCountsPerFloor[floor]++;
-            }
-          }
-
-          // Step 3: Apply drawing logic
-          for (let entity of entities) {
-            if (!entity.polygon) continue;
-
-            const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
-            const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-            const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-            const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
-            const base = baseHeight * (floor - 1);
-
-            if (sub.includes("ked") || sub.includes("kol")) {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + height;
-              entity.polygon.material = Cesium.Color.GRAY.withAlpha(0.8);
-              entity.polygon.outline = true;
-              entity.polygon.outlineColor = Cesium.Color.YELLOW;
-
-            } else if (sub.includes("kar")) {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + height;
-              entity.polygon.material = Cesium.Color.BROWN.withAlpha(0.8);
-
-              const doorEntity = viewer.entities.add({
-  name: entity.name?.getValue(Cesium.JulianDate.now()) || "Door",
-  polygon: {
-    hierarchy: hierarchy,
-    height: entity.polygon.extrudedHeight,
-    extrudedHeight: entity.polygon.height + baseHeight,
-    material: Cesium.Color.GRAY.withAlpha(0.8),
-    outline: true,
-    outlineColor: Cesium.Color.YELLOW
-  },
-  properties: entity.properties // ✅ Reuse original attributes
-});
-
-
-              if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-              subtypeEntityMap[sub].push(doorEntity);
-
-            } else if (sub.includes("fan")) {
-              const middleStart = base + ((baseHeight - height) / 2) + 0.3;
-              const middleEnd = middleStart + height - 0.3;
-
-              entity.polygon.height = middleStart;
-              entity.polygon.extrudedHeight = middleEnd;
-              entity.polygon.material = Cesium.Color.AQUA.withAlpha(0.8);
-
-              const windowEntity1 = viewer.entities.add({
-        name: entity.name?.getValue(Cesium.JulianDate.now()) || "Window Part",
-        polygon: {
-          hierarchy: hierarchy,
-          height: entity.polygon.extrudedHeight,
-          extrudedHeight: entity.polygon.height + ((baseHeight - ObjectHeights) / 2) - 0.3 + ObjectHeights,
-          material: Cesium.Color.GRAY.withAlpha(0.8),
-          outline: true,
-          outlineColor: Cesium.Color.YELLOW
-        },
-        properties: entity.properties // ✅ Keep all original attributes
-      });
+    function pushToSubtypeMap(sub, ent) {
       if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-              subtypeEntityMap[sub].push(windowEntity1);
+      subtypeEntityMap[sub].push(ent);
+    }
 
-      const windowEntity2 = viewer.entities.add({
-        name: entity.name?.getValue(Cesium.JulianDate.now()) || "Window Part",
-        polygon: {
-          hierarchy: hierarchy,
-          height: objectStart,
-          extrudedHeight: objectStart + ((baseHeight - ObjectHeights) / 2) + 0.3,
-          material: Cesium.Color.GRAY.withAlpha(0.8),
-          outline: true,
-          outlineColor: Cesium.Color.YELLOW
-        },
-        properties: entity.properties
-      });
-       if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-              subtypeEntityMap[sub].push(windowEntity2);
-
-
-            } else if (sub.includes("iat") || sub.includes("aiv")) {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + 0.1;
-              entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.5);
-
-            } else if (sub.includes("kib")) {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + 0.3;
-              entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.8);
-
-              viewer.entities.remove(entity); // remove stair polygons
-
-            } else if (sub.includes("lif")) {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + baseHeight;
-              entity.polygon.material = Cesium.Color.PINK.withAlpha(0.8);
-
-            } else {
-              entity.polygon.height = base;
-              entity.polygon.extrudedHeight = base + height;
-              entity.polygon.material = Cesium.Color.RED.withAlpha(1);
-
-              entity.properties = entity.properties || new Cesium.PropertyBag();
-              entity.properties.SUB_TYPE = new Cesium.ConstantProperty("Unknown");
-
-              const newSub = "unknown";
-              if (!subtypeEntityMap[newSub]) subtypeEntityMap[newSub] = [];
-              subtypeEntityMap[newSub].push(entity);
-            }
-          }
-
-          // Finally: generate the jstree structure
-          const treeData = buildJsTreeData(reprojected.features);
-          initializeJsTree(treeData);
-        });
+    // Step 1: Find baseHeight from "kedeli"
+    for (let entity of entities) {
+      if (!entity.polygon) continue;
+      const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
+      const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+      if (sub.includes("ked")) {
+        baseHeight = height;
       }
+      pushToSubtypeMap(sub, entity);
+    }
+
+    // Step 2: Count stairs per floor
+    for (let entity of entities) {
+      if (!entity.polygon) continue;
+      const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
+      const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
+      if (sub.includes("kib")) {
+        if (!stairCountsPerFloor[floor]) stairCountsPerFloor[floor] = 0;
+        stairCountsPerFloor[floor]++;
+      }
+    }
+
+    // Step 3: Render by subtype
+    for (let entity of entities) {
+      if (!entity.polygon) continue;
+
+      const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
+      const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+      const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
+      const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+      const base = baseHeight * (floor - 1);
+
+      if (sub.includes("ked") || sub.includes("kol")) {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + height;
+        entity.polygon.material = Cesium.Color.GRAY.withAlpha(0.8);
+        entity.polygon.outline = true;
+        entity.polygon.outlineColor = Cesium.Color.YELLOW;
+
+      } else if (sub.includes("kar")) {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + height;
+        entity.polygon.material = Cesium.Color.BROWN.withAlpha(0.8);
+
+        const doorEntity = viewer.entities.add({
+          name: entity.name?.getValue(Cesium.JulianDate.now()) || "Door",
+          polygon: {
+            hierarchy: hierarchy,
+            height: entity.polygon.extrudedHeight,
+            extrudedHeight: entity.polygon.height + baseHeight,
+            material: Cesium.Color.GRAY.withAlpha(0.8),
+            outline: true,
+            outlineColor: Cesium.Color.YELLOW
+          },
+          properties: entity.properties
+        });
+        pushToSubtypeMap(sub, doorEntity);
+
+      } else if (sub.includes("fan")) {
+        const middleStart = base + ((baseHeight - height) / 2) + 0.3;
+        const middleEnd = middleStart + height - 0.3;
+
+        entity.polygon.height = middleStart;
+        entity.polygon.extrudedHeight = middleEnd;
+        entity.polygon.material = Cesium.Color.AQUA.withAlpha(0.8);
+
+        const windowEntity1 = viewer.entities.add({
+          name: entity.name?.getValue(Cesium.JulianDate.now()) || "Window Part",
+          polygon: {
+            hierarchy: hierarchy,
+            height: middleEnd,
+            extrudedHeight: middleEnd + 0.3,
+            material: Cesium.Color.GRAY.withAlpha(0.8),
+            outline: true,
+            outlineColor: Cesium.Color.YELLOW
+          },
+          properties: entity.properties
+        });
+        pushToSubtypeMap(sub, windowEntity1);
+
+        const windowEntity2 = viewer.entities.add({
+          name: entity.name?.getValue(Cesium.JulianDate.now()) || "Window Part",
+          polygon: {
+            hierarchy: hierarchy,
+            height: base,
+            extrudedHeight: base + ((baseHeight - height) / 2) + 0.3,
+            material: Cesium.Color.GRAY.withAlpha(0.8),
+            outline: true,
+            outlineColor: Cesium.Color.YELLOW
+          },
+          properties: entity.properties
+        });
+        pushToSubtypeMap(sub, windowEntity2);
+
+      } else if (sub.includes("iat") || sub.includes("aiv")) {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + 0.1;
+        entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.5);
+
+      } else if (sub.includes("kib")) {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + 0.3;
+        entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.8);
+
+        viewer.entities.remove(entity); // skip drawing stair block
+
+      } else if (sub.includes("lif")) {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + baseHeight;
+        entity.polygon.material = Cesium.Color.PINK.withAlpha(0.8);
+
+      } else {
+        entity.polygon.height = base;
+        entity.polygon.extrudedHeight = base + height;
+        entity.polygon.material = Cesium.Color.RED.withAlpha(1);
+
+        entity.properties = entity.properties || new Cesium.PropertyBag();
+        entity.properties.SUB_TYPE = new Cesium.ConstantProperty("Unknown");
+        pushToSubtypeMap("unknown", entity);
+      }
+    }
+
+    const treeData = buildJsTreeData(reprojected.features);
+    initializeJsTree(treeData);
+  });
+}
 
         processGeoJSON(inputGeojson);
     </script>
