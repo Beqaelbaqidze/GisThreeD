@@ -9,31 +9,70 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "Segoe UI", sans-serif; }
-    #mainContainer { display: flex; height: 100%; width: 100%; }
-    #cesiumContainer { flex-grow: 1; background: white; }
-    #sidebar {
-      width: 340px;
-      background: #1e1e1e;
-      color: #f0f0f0;
-      overflow-y: auto;
-      border-left: 2px solid #333;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    #sidebar h4 {
-      margin: 10px 0;
-      font-size: 18px;
-      color: #61dafb;
-      border-bottom: 1px solid #444;
-      padding-bottom: 5px;
-    }
-    .jstree-anchor { color: #ddd !important; }
-    #sidebar::-webkit-scrollbar { width: 6px; }
-    #sidebar::-webkit-scrollbar-thumb { background-color: #444; }
-    #sidebar::-webkit-scrollbar-thumb:hover { background: #888; }
-  </style>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  #mainContainer {
+    display: flex; height: 100%; width: 100%;
+  }
+
+  #cesiumContainer {
+    flex-grow: 1;
+    background-color: white;
+  }
+
+  #sidebar {
+    width: 300px;
+    background: #1e1e1e;
+    color: #ddd;
+    overflow-y: auto;
+    border-left: 1px solid #333;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  #sidebar h4 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #00bcd4;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+  }
+
+  .jstree-default .jstree-anchor { color: #eee; font-size: 14px; }
+  .jstree-default .jstree-icon { background-size: contain; background-repeat: no-repeat; }
+
+  /* Icon overrides */
+  .jstree-default .cad > .jstree-anchor > .jstree-icon {
+    background-image: url('https://img.icons8.com/ios-filled/16/ffffff/home.png');
+  }
+  .jstree-default .reg > .jstree-anchor > .jstree-icon {
+    background-image: url('https://img.icons8.com/ios-filled/16/ffffff/document.png');
+  }
+  .jstree-default .floor > .jstree-anchor > .jstree-icon {
+    background-image: url('https://img.icons8.com/ios-filled/16/ffffff/floor-plan.png');
+  }
+  .jstree-default .type > .jstree-anchor > .jstree-icon {
+    background-image: url('https://img.icons8.com/ios-filled/16/ffffff/box.png');
+  }
+  .jstree-default .subtype > .jstree-anchor > .jstree-icon {
+    background-image: url('https://img.icons8.com/ios-filled/16/ffffff/structure.png');
+  }
+
+  /* Scrollbar */
+  #sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #sidebar::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 10px;
+  }
+</style>
+
 </head>
 <body>
 <div id="mainContainer">
@@ -115,26 +154,38 @@
   }
 
   function initializeJsTree(treeData) {
-    $('#jstree-panel').jstree('destroy');
-    $('#jstree-panel').jstree({
-      'core': { 'data': treeData, 'themes': { 'stripes': true } },
-      'plugins': ["checkbox"]
-    });
+  $('#jstree-panel').jstree('destroy');
+  $('#jstree-panel').jstree({
+    core: {
+      data: treeData.map(node => {
+        // assign a class for icons
+        if (node.id.includes("cad:")) node.li_attr = { class: "cad" };
+        if (node.id.includes("/reg:")) node.li_attr = { class: "reg" };
+        if (node.id.includes("/floor:")) node.li_attr = { class: "floor" };
+        if (node.id.includes("/type:")) node.li_attr = { class: "type" };
+        if (node.id.includes("/subtype:")) node.li_attr = { class: "subtype" };
+        return node;
+      }),
+      themes: { stripes: true }
+    },
+    plugins: ["checkbox"]
+  });
 
-    $('#jstree-panel').on('changed.jstree', function (e, data) {
-      const visibleSubtypes = new Set();
-      data.selected.forEach(id => {
-        if (id.includes("subtype:")) {
-          const subtype = id.split("subtype:")[1];
-          visibleSubtypes.add(subtype);
-        }
-      });
-      for (const subtype in subtypeEntityMap) {
-        const visible = visibleSubtypes.has(subtype);
-        subtypeEntityMap[subtype].forEach(ent => ent.show = visible);
+  $('#jstree-panel').on('changed.jstree', function (e, data) {
+    const visibleSubtypes = new Set();
+    data.selected.forEach(id => {
+      if (id.includes("subtype:")) {
+        const subtype = id.split("subtype:")[1];
+        visibleSubtypes.add(subtype);
       }
     });
-  }
+    for (const subtype in subtypeEntityMap) {
+      const visible = visibleSubtypes.has(subtype);
+      subtypeEntityMap[subtype].forEach(ent => ent.show = visible);
+    }
+  });
+}
+
 
   function processGeoJSON(data) {
     const reprojected = reprojectGeoJSON(data);
