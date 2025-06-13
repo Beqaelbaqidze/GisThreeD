@@ -210,6 +210,7 @@ for (let entity of entities) {
         height: entity.polygon.extrudedHeight,
         extrudedHeight: entity.polygon.height + baseHeight,
         material: Cesium.Color.GRAY.withAlpha(0.8),
+        properties: entity.properties,
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       }
@@ -230,7 +231,9 @@ for (let entity of entities) {
         extrudedHeight: middleStart + ((baseHeight - height) / 2) - 0.3 + height,
         material: Cesium.Color.GRAY.withAlpha(0.8),
         outline: true,
-        outlineColor: Cesium.Color.YELLOW
+        outlineColor: Cesium.Color.YELLOW,
+        properties: entity.properties
+
       }
     });
 
@@ -241,7 +244,8 @@ for (let entity of entities) {
         extrudedHeight: middleStart,
         material: Cesium.Color.GRAY.withAlpha(0.8),
         outline: true,
-        outlineColor: Cesium.Color.YELLOW
+        outlineColor: Cesium.Color.YELLOW,
+        properties: entity.properties
       }
     });
 
