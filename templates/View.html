@@ -155,6 +155,11 @@ for (let entity of entities) {
   const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
   const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
 
+   if (!subtypeEntityMap[sub]) {
+        subtypeEntityMap[sub] = [];
+      }
+      subtypeEntityMap[sub].push(entity);
+
   if (sub.includes("ked")) {
     baseHeight = height;
   }
