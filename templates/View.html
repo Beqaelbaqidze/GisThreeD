@@ -214,7 +214,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties: entity.properties
+      properties:{
+        SUB_TYPE: "kedeli"
+      }
     });
 
   } else if (sub.includes("fan")) {
@@ -235,7 +237,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties: entity.properties
+      properties:{
+        SUB_TYPE: "kedeli"
+      }
     });
 
     viewer.entities.add({
@@ -248,7 +252,9 @@ for (let entity of entities) {
         outline: true,
         outlineColor: Cesium.Color.YELLOW
       },
-      properties: entity.properties
+      properties:{
+        SUB_TYPE: "kedeli"
+      }
     });
 
   } else if (sub.includes("iat") || sub.includes("aiv")) {
