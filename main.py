@@ -1,29 +1,33 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import json, threading, webbrowser
+import json, uuid
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-geojson_data = {}  # global storage
+# Store each user's data by unique ID
+geojson_store = {}
 
-@app.post("/viewer", response_class=HTMLResponse)
-async def receive_and_redirect(request: Request):
-    global geojson_data
-    geojson_data = await request.json()
+@app.post("/viewer", response_class=JSONResponse)
+async def receive_geojson(request: Request):
+    data = await request.json()
+    uid = str(uuid.uuid4())
+    geojson_store[uid] = data
 
-    # Open browser to /live after 1 second
-    threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:8000/live")).start()
-    
-    return HTMLResponse(content="GeoJSON received. Opening viewer...", status_code=200)
+    # Return only the link — DO NOT open browser
+    return {"url": f"http://164.92.170.36:8000/live/{uid}"}
 
-@app.get("/live", response_class=HTMLResponse)
-async def render_viewer(request: Request):
+@app.get("/live/{uid}", response_class=HTMLResponse)
+async def show_viewer(request: Request, uid: str):
+    geojson = geojson_store.get(uid)
+    if not geojson:
+        return HTMLResponse("Not found or expired.", status_code=404)
+
     return templates.TemplateResponse("View.html", {
         "request": request,
-        "geojson_data": json.dumps(geojson_data)
+        "geojson_data": json.dumps(geojson)
     })
