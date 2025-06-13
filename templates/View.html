@@ -239,7 +239,7 @@ function processGeoJSON(data) {
 
       } else if (sub.includes("fan")) {
         const middleStart = base + ((baseHeight - height) / 2) + 0.3;
-        const middleEnd = middleStart + height - 0.3;
+        const middleEnd = middleStart + height + 0.3;
 
         entity.polygon.height = middleStart;
         entity.polygon.extrudedHeight = middleEnd;
