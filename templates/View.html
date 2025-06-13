@@ -6,14 +6,34 @@
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+  <!-- jsTree -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
   <style>
-    html, body, #cesiumContainer {
-      width: 100%;
-      height: 100%;
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
       overflow: hidden;
+      font-family: sans-serif;
+    }
+    #mainContainer {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+    #cesiumContainer {
+      flex-grow: 1;
       background: white;
+    }
+    #sidebar {
+      width: 300px;
+      background: #f4f4f4;
+      overflow-y: auto;
+      border-left: 1px solid #ccc;
+      padding: 10px;
     }
     canvas {
       background: white !important;
@@ -21,171 +41,184 @@
   </style>
 </head>
 <body>
+<div id="mainContainer">
   <div id="cesiumContainer"></div>
-  <script>
-    const inputGeojson = {{ geojson_data | safe }};
+  <div id="sidebar">
+    <h4>GeoJSON Structure</h4>
+    <div id="jstree-panel"></div>
+  </div>
+</div>
 
-    const viewer = new Cesium.Viewer("cesiumContainer", {
-      animation: false,
-      timeline: false,
-      baseLayerPicker: false,
-      skyBox: false,
-      skyAtmosphere: false,
-      geocoder: false,
-      homeButton: false,
-      sceneModePicker: false,
-      navigationHelpButton: false,
-      infoBox: true,
-      selectionIndicator: true,
-      fullscreenButton: false,
-      sceneMode: Cesium.SceneMode.SCENE3D
+<script>
+  const inputGeojson = {{ geojson_data | safe }};
+
+  const viewer = new Cesium.Viewer("cesiumContainer", {
+    animation: false,
+    timeline: false,
+    baseLayerPicker: false,
+    skyBox: false,
+    skyAtmosphere: false,
+    geocoder: false,
+    homeButton: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+    infoBox: true,
+    selectionIndicator: true,
+    fullscreenButton: false,
+    sceneMode: Cesium.SceneMode.SCENE3D
+  });
+
+  viewer.scene.backgroundColor = Cesium.Color.WHITE;
+  proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
+
+  function buildJsTreeData(features) {
+    const treeData = [];
+    const treeMap = {};
+
+    features.forEach(f => {
+      const props = f.properties;
+      const cad = props.CADCODE || "Unknown";
+      const unit = props.UNIT_CODE || "Unknown";
+      const floor = String(props.FLOOR || "Unknown");
+      const unitType = props.UNIT_TYPE || "Unknown";
+      const subType = props.SUB_TYPE || "Unknown";
+
+      const path = [
+        [cad, `cad:${cad}`],
+        [unit, `${cad}:${unit}`],
+        [floor, `${cad}:${unit}:${floor}`],
+        [unitType, `${cad}:${unit}:${floor}:${unitType}`],
+        [subType, `${cad}:${unit}:${floor}:${unitType}:${subType}`]
+      ];
+
+      path.forEach((item, i) => {
+        const text = item[0];
+        const id = item[1];
+        const parent = i === 0 ? "#" : path[i - 1][1];
+        if (!treeMap[id]) {
+          const node = { id, parent, text };
+          treeData.push(node);
+          treeMap[id] = true;
+        }
+      });
     });
 
-    viewer.scene.backgroundColor = Cesium.Color.WHITE;
-    proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
+    return treeData;
+  }
 
-    function reprojectGeoJSON(geojson) {
-      return {
-        type: "FeatureCollection",
-        features: geojson.features.map(feature => {
-          const coords = feature.geometry.coordinates[0].map(pt =>
-            proj4("EPSG:32638", "EPSG:4326", pt)
-          );
-          return {
-            type: "Feature",
-            geometry: { type: "Polygon", coordinates: [coords] },
-            properties: feature.properties
-          };
-        })
-      };
-    }
+  function reprojectGeoJSON(geojson) {
+    return {
+      type: "FeatureCollection",
+      features: geojson.features.map(feature => {
+        const coords = feature.geometry.coordinates[0].map(pt =>
+          proj4("EPSG:32638", "EPSG:4326", pt)
+        );
+        return {
+          type: "Feature",
+          geometry: { type: "Polygon", coordinates: [coords] },
+          properties: feature.properties
+        };
+      })
+    };
+  }
 
-    function processGeoJSON(data) {
-      const reprojected = reprojectGeoJSON(data);
-      Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
-        viewer.dataSources.add(dataSource);
-        viewer.zoomTo(dataSource);
-        const entities = dataSource.entities.values;
+  function processGeoJSON(data) {
+    const reprojected = reprojectGeoJSON(data);
+    Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+      viewer.dataSources.add(dataSource);
+      viewer.zoomTo(dataSource);
 
-        let baseHeight = 0;
-        let stairCountsPerFloor = {};
+      const entities = dataSource.entities.values;
+      const jsTreeData = buildJsTreeData(reprojected.features);
+      $('#jstree-panel').jstree({ 'core': { 'data': jsTreeData } });
 
-        for (let entity of entities) {
-          if (!entity.polygon) continue;
-          const SubTypes = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now());
-          const ObjectHeights = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-          if ((SubTypes || "").toLowerCase() === "kedeli") baseHeight = ObjectHeights;
+      let baseHeight = 0;
+      let stairCountsPerFloor = {};
+
+      for (let entity of entities) {
+        if (!entity.polygon) continue;
+        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
+        const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+        if (subType.toLowerCase() === "kedeli") baseHeight = height;
+      }
+
+      for (let entity of entities) {
+        if (!entity.polygon) continue;
+        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
+        const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
+        if (subType.toLowerCase() === "kibis ujredi") {
+          stairCountsPerFloor[floor] = (stairCountsPerFloor[floor] || 0) + 1;
         }
+      }
 
-        for (let entity of entities) {
-          if (!entity.polygon) continue;
-          const SubTypes = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
-          const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-          if (SubTypes.toLowerCase() === "kibis ujredi") {
-            stairCountsPerFloor[floor] = (stairCountsPerFloor[floor] || 0) + 1;
-          }
-        }
+      for (let entity of entities) {
+        if (!entity.polygon) continue;
+        const subType = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
+        const height = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+        const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
+        const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+        const base = baseHeight * (floor - 1);
 
-        for (let entity of entities) {
-          if (!entity.polygon) continue;
-          const SubTypes = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now());
-          const ObjectHeights = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-          const floor = entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0;
-          const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
-          const objectStart = baseHeight * (floor - 1);
-
-          if (SubTypes === "kedeli" || SubTypes === "kolona") {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + ObjectHeights;
+        switch (subType.toLowerCase()) {
+          case "kedeli":
+          case "kolona":
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + height;
             entity.polygon.material = Cesium.Color.GRAY.withAlpha(0.8);
-            entity.polygon.outline = true;
-            entity.polygon.outlineColor = Cesium.Color.YELLOW;
-          } else if (SubTypes === "karebi") {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + ObjectHeights;
+            break;
+
+          case "karebi":
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + height;
             entity.polygon.material = Cesium.Color.BROWN.withAlpha(0.8);
             viewer.entities.add({
               polygon: {
                 hierarchy,
                 height: entity.polygon.extrudedHeight,
-                extrudedHeight: entity.polygon.height + baseHeight,
+                extrudedHeight: base + baseHeight,
                 material: Cesium.Color.GRAY.withAlpha(0.8),
                 outline: true,
                 outlineColor: Cesium.Color.YELLOW
               }
             });
-          } else if (SubTypes === "fanjara") {
-            entity.polygon.height = objectStart + ((baseHeight - ObjectHeights) / 2) + 0.3;
-            entity.polygon.extrudedHeight = entity.polygon.height + ObjectHeights;
+            break;
+
+          case "fanjara":
+            entity.polygon.height = base + ((baseHeight - height) / 2) + 0.3;
+            entity.polygon.extrudedHeight = entity.polygon.height + height;
             entity.polygon.material = Cesium.Color.AQUA.withAlpha(0.8);
-          } else if (SubTypes === "iataki" || SubTypes === "aivani") {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + 0.1;
+            break;
+
+          case "iataki":
+          case "aivani":
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + 0.1;
             entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.5);
-          } else if (SubTypes === "kibis ujredi") {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + 0.3;
+            break;
+
+          case "kibis ujredi":
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + 0.3;
             entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.8);
             viewer.entities.remove(entity);
-          } else if (SubTypes === "liftis Saxta") {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + baseHeight;
+            break;
+
+          case "liftis saxta":
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + baseHeight;
             entity.polygon.material = Cesium.Color.PINK.withAlpha(0.8);
-          } else {
-            entity.polygon.height = objectStart;
-            entity.polygon.extrudedHeight = objectStart + ObjectHeights;
+            break;
+
+          default:
+            entity.polygon.height = base;
+            entity.polygon.extrudedHeight = base + height;
             entity.polygon.material = Cesium.Color.BLACK.withAlpha(0.8);
-          }
         }
-      });
-    }
-
-    processGeoJSON(inputGeojson);
-
-    // Movement setup — same as yours
-    let isPointerLocked = false;
-    const moveSpeed = 0.15;
-    const rotateSpeed = 0.002;
-    const canvas = viewer.scene.canvas;
-    const keysPressed = { w: false, a: false, s: false, d: false, q: false, e: false };
-
-    document.addEventListener("keydown", e => {
-      if (e.code === "Enter" && !isPointerLocked) canvas.requestPointerLock();
-      if (isPointerLocked) keysPressed[e.code.slice(3).toLowerCase()] = true;
-    });
-
-    document.addEventListener("keyup", e => {
-      keysPressed[e.code.slice(3).toLowerCase()] = false;
-    });
-
-    document.addEventListener("pointerlockchange", () => {
-      isPointerLocked = document.pointerLockElement === canvas;
-    });
-
-    document.addEventListener("mousemove", e => {
-      if (!isPointerLocked) return;
-      const camera = viewer.camera;
-      const yaw = e.movementX * rotateSpeed;
-      const pitch = -e.movementY * rotateSpeed;
-      const newPitch = Cesium.Math.clamp(camera.pitch + pitch, -Cesium.Math.PI_OVER_TWO + 0.1, Cesium.Math.PI_OVER_TWO - 0.1);
-      camera.setView({ orientation: { heading: camera.heading + yaw, pitch: newPitch, roll: 0.0 } });
-    });
-
-    function update() {
-      if (isPointerLocked) {
-        const camera = viewer.camera;
-        if (keysPressed.w) camera.moveForward(moveSpeed);
-        if (keysPressed.s) camera.moveBackward(moveSpeed);
-        if (keysPressed.a) camera.moveLeft(moveSpeed);
-        if (keysPressed.d) camera.moveRight(moveSpeed);
-        const yawRate = Cesium.Math.toRadians(1.5);
-        if (keysPressed.q) camera.setView({ orientation: { heading: camera.heading - yawRate, pitch: camera.pitch, roll: 0.0 } });
-        if (keysPressed.e) camera.setView({ orientation: { heading: camera.heading + yawRate, pitch: camera.pitch, roll: 0.0 } });
       }
-      requestAnimationFrame(update);
-    }
+    });
+  }
 
-    update();
-  </script>
+  processGeoJSON(inputGeojson);
+</script>
 </body>
 </html>
