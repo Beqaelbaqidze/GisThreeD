@@ -135,71 +135,73 @@
     });
   }
 
-  function processGeoJSON(data) {
-    const reprojected = reprojectGeoJSON(data);
-    Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
-      viewer.dataSources.add(dataSource);
-      viewer.zoomTo(dataSource);
-      const entities = dataSource.entities.values;
-      let baseHeight = 0;
-      for (let entity of entities) {
-        const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "";
-        const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-        if (sub.toLowerCase() === "kedeli") baseHeight = h;
+ function processGeoJSON(data) {
+  const reprojected = reprojectGeoJSON(data);
+  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+    viewer.dataSources.add(dataSource);
+    viewer.zoomTo(dataSource);
+    const entities = dataSource.entities.values;
+
+    let baseHeight = 0;
+    for (let entity of entities) {
+      const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
+      const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+      if (sub.includes("ked")) baseHeight = h;
+    }
+
+    for (let entity of entities) {
+      if (!entity.polygon) continue;
+
+      const sub = entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now())?.toLowerCase() || "";
+      const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
+      const floor = parseInt(entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0);
+      const base = baseHeight * (floor - 1);
+      const poly = entity.polygon;
+
+      if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
+      subtypeEntityMap[sub].push(entity);
+
+      if (sub.includes("ked") || sub.includes("kol")) {
+        poly.height = base;
+        poly.extrudedHeight = base + h;
+        poly.material = Cesium.Color.GRAY.withAlpha(0.8);
+      } else if (sub.includes("fan")) {
+        poly.height = base + ((baseHeight - h) / 2) + 0.3;
+        poly.extrudedHeight = poly.height + h;
+        poly.material = Cesium.Color.AQUA.withAlpha(0.8);
+      } else if (sub.includes("iat") || sub.includes("aiv")) {
+        poly.height = base;
+        poly.extrudedHeight = base + 0.1;
+        poly.material = Cesium.Color.BLACK.withAlpha(0.5);
+      } else if (sub.includes("kib")) {
+        poly.height = base;
+        poly.extrudedHeight = base + 0.3;
+        poly.material = Cesium.Color.BLUE.withAlpha(0.8);
+        viewer.entities.remove(entity);
+      } else if (sub.includes("lif")) {
+        poly.height = base;
+        poly.extrudedHeight = base + baseHeight;
+        poly.material = Cesium.Color.PINK.withAlpha(0.8);
+      } else if (sub.includes("kar")) {
+        poly.height = base;
+        poly.extrudedHeight = base + h;
+        poly.material = Cesium.Color.BROWN.withAlpha(0.8);
+      } else if (sub.includes("Rio")) {
+        poly.height = base;
+        poly.extrudedHeight = base + h;
+        poly.material = Cesium.Color.WHITE.withAlpha(0.8);
+      } else {
+        poly.height = base;
+        poly.extrudedHeight = base + h;
+        poly.material = Cesium.Color.BLACK.withAlpha(0.8);
       }
-      for (let entity of entities) {
-        if (!entity.polygon) continue;
-        const sub = (entity.properties?.SUB_TYPE?.getValue(Cesium.JulianDate.now()) || "").toLowerCase();
-        const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
-        const floor = parseInt(entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0);
-        const base = baseHeight * (floor - 1);
-        const poly = entity.polygon;
-        if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-        subtypeEntityMap[sub].push(entity);
-        switch (sub) {
-          case "kedeli":
-          case "kolona":
-            poly.height = base;
-            poly.extrudedHeight = base + h;
-            poly.material = Cesium.Color.GRAY.withAlpha(0.8);
-            break;
-          case "fanjara":
-            poly.height = base + ((baseHeight - h) / 2) + 0.3;
-            poly.extrudedHeight = poly.height + h;
-            poly.material = Cesium.Color.AQUA.withAlpha(0.8);
-            break;
-          case "iataki":
-          case "aivani":
-            poly.height = base;
-            poly.extrudedHeight = base + 0.1;
-            poly.material = Cesium.Color.BLACK.withAlpha(0.5);
-            break;
-          case "kibis ujredi":
-            poly.height = base;
-            poly.extrudedHeight = base + 0.3;
-            poly.material = Cesium.Color.BLUE.withAlpha(0.8);
-            viewer.entities.remove(entity);
-            break;
-          case "liftis saxta":
-            poly.height = base;
-            poly.extrudedHeight = base + baseHeight;
-            poly.material = Cesium.Color.PINK.withAlpha(0.8);
-            break;
-          case "karebi":
-            poly.height = base;
-            poly.extrudedHeight = base + h;
-            poly.material = Cesium.Color.BROWN.withAlpha(0.8);
-            break;
-          default:
-            poly.height = base;
-            poly.extrudedHeight = base + h;
-            poly.material = Cesium.Color.BLACK.withAlpha(0.8);
-        }
-      }
-      const treeData = buildJsTreeData(reprojected.features);
-      initializeJsTree(treeData);
-    });
-  }
+    }
+
+    const treeData = buildJsTreeData(reprojected.features);
+    initializeJsTree(treeData);
+  });
+}
+
 
   processGeoJSON(inputGeojson);
 </script>
