@@ -32,7 +32,7 @@
       font-size: 14px;
     }
     ul { padding-left: 20px; list-style-type: none; }
-    li { margin: 2px 0; cursor: pointer; }
+    li { margin: 2px 0; }
     .level1 { font-weight: bold; }
     .level2 { padding-left: 10px; }
     .level3 { padding-left: 20px; }
@@ -71,6 +71,8 @@
   viewer.scene.backgroundColor = Cesium.Color.WHITE;
   proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
 
+  const subtypeEntityMap = {}; // Stores subtype → [entities]
+
   function reprojectGeoJSON(geojson) {
     return {
       type: "FeatureCollection",
@@ -91,12 +93,12 @@
     const tree = {};
 
     for (const f of features) {
-      const { CADCODE = "?", REG_N = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
+      const { CADCODE = "?", UNIT_CODE = "?", FLOOR = "?", UNIT_TYPE = "?", SUB_TYPE = "?" } = f.properties;
       if (!tree[CADCODE]) tree[CADCODE] = {};
-      if (!tree[CADCODE][REG_N]) tree[CADCODE][REG_N] = {};
-      if (!tree[CADCODE][REG_N][FLOOR]) tree[CADCODE][REG_N][FLOOR] = {};
-      if (!tree[CADCODE][REG_N][FLOOR][UNIT_TYPE]) tree[CADCODE][REG_N][FLOOR][UNIT_TYPE] = new Set();
-      tree[CADCODE][REG_N][FLOOR][UNIT_TYPE].add(SUB_TYPE);
+      if (!tree[CADCODE][UNIT_CODE]) tree[CADCODE][UNIT_CODE] = {};
+      if (!tree[CADCODE][UNIT_CODE][FLOOR]) tree[CADCODE][UNIT_CODE][FLOOR] = {};
+      if (!tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE]) tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE] = new Set();
+      tree[CADCODE][UNIT_CODE][FLOOR][UNIT_TYPE].add(SUB_TYPE);
     }
 
     const container = document.getElementById("customTree");
@@ -128,8 +130,25 @@
 
             for (const subType of tree[cadcode][unit][floor][unitType]) {
               const liSub = document.createElement("li");
-              liSub.textContent = subType;
               liSub.classList.add("level5");
+
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.checked = true;
+              checkbox.dataset.subtype = subType;
+              checkbox.addEventListener("change", e => {
+                const type = e.target.dataset.subtype;
+                const visible = e.target.checked;
+                if (subtypeEntityMap[type]) {
+                  subtypeEntityMap[type].forEach(ent => ent.show = visible);
+                }
+              });
+
+              const label = document.createElement("label");
+              label.textContent = " " + subType;
+
+              liSub.appendChild(checkbox);
+              liSub.appendChild(label);
               ulSub.appendChild(liSub);
             }
 
@@ -176,8 +195,12 @@
         const h = parseFloat(entity.properties?.HEIGHT?.getValue(Cesium.JulianDate.now()) || 0);
         const floor = parseInt(entity.properties?.FLOOR?.getValue(Cesium.JulianDate.now()) || 0);
         const base = baseHeight * (floor - 1);
-
         const poly = entity.polygon;
+
+        // Save by subtype
+        if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
+        subtypeEntityMap[sub].push(entity);
+
         switch (sub) {
           case "kedeli":
           case "kolona":
