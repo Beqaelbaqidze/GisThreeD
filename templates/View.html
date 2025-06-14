@@ -72,7 +72,10 @@
     </div>
     <script>
                                   const inputGeojson = {{ geojson_data | safe }};
+                                  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YzYxNGM1Yy0wZjU0LTRkZWEtYTZhMy04NGRkM2Q3Y2EwM2MiLCJpZCI6MjAxOTE1LCJpYXQiOjE3MTA0MTQxNjJ9.ESJo3qUQ0CIMEgeSHMDIUHeZEGo5yUFnP5XMut8OU2o';
+
                                   const viewer = new Cesium.Viewer("cesiumContainer", {
+                                    terrainProvider: Cesium.createWorldTerrain(),
                                     animation: false,
                                     timeline: false,
                                     baseLayerPicker: false,
@@ -384,7 +387,7 @@
       //                 }
 function processGeoJSON(data) {
   const reprojected = reprojectGeoJSON(data);
-  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: true }).then(dataSource => {
     viewer.dataSources.add(dataSource);
     viewer.zoomTo(dataSource);
 
