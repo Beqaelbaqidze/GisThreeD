@@ -214,11 +214,11 @@ export async function processGeoJSON(data, viewer) {
           viewer.entities.add({
             position: labelLonLat,
             label: {
-              text: `${props?.Shape_Area?.getValue(julianNow) || "0"} მ²`,
-              font: "14px sans-serif",
+              text: `${Number(props?.Shape_Area?.getValue(julianNow) || 0).toFixed(2)} მ²`,
+              font: "16px sans-serif",
               fillColor: Cesium.Color.WHITE,
               outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
+              outlineWidth: 3,
               style: Cesium.LabelStyle.FILL_AND_OUTLINE,
               horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
               verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
