@@ -83,7 +83,7 @@ export async function processGeoJSON(data, viewer) {
             hierarchy,
             height: floorBase,
             extrudedHeight: floorTop,
-            material: Cesium.Color.fromRandom({ alpha: 0.6 }),
+            // material: Cesium.Color.fromRandom({ alpha: 0.6 }),
             outline: true,
             outlineColor: Cesium.Color.BLACK,
           },
