@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -596,4 +596,54 @@ async function processGeoJSON(data) {
 })();
     </script>
   </body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>3D GeoJSON Viewer</title>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+    #mainContainer { display: flex; height: 100%; width: 100%; }
+    #cesiumContainer { flex-grow: 1; background: white; }
+    #sidebar {
+      width: 340px; color: #1e1e1e; background: #f0f0f0; overflow-y: auto;
+      border-left: 2px solid #333; padding: 10px; box-sizing: border-box;
+    }
+    #sidebar h4 { margin: 10px 0; font-size: 18px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+    .jstree-anchor { color: #1e1e1e !important; }
+    #sidebar::-webkit-scrollbar { width: 6px; }
+    #sidebar::-webkit-scrollbar-thumb { background-color: #444; }
+    #sidebar::-webkit-scrollbar-thumb:hover { background: #888; }
+  </style>
+</head>
+<body>
+  <div id="mainContainer">
+    <div id="cesiumContainer"></div>
+    <div id="sidebar">
+      <h4>GeoJSON Structure</h4>
+      <div id="jstree-panel"></div>
+    </div>
+  </div>
+
+  <script>
+    const inputGeojson = {{ geojson_data | safe }};
+  </script>
+
+  <script type="module">
+    import { initializeViewer } from './static/viewer.js';
+    import { processGeoJSON } from './static/geojsonLoader.js';
+
+    const viewer = await initializeViewer();
+    await processGeoJSON(inputGeojson, viewer);
+  </script>
+</body>
 </html>
