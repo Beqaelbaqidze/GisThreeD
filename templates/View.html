@@ -369,8 +369,8 @@ function processGeoJSON(data) {
         if (!isNaN(sarTuli) && sarTuli > 1) {
           viewer.entities.remove(entity);
           for (let i = 0; i < sarTuli; i++) {
-            const start = baseHeight * i;
-            const end = baseHeight * (i + 1);
+            const start = baseHeight * (i - 1);
+            const end = baseHeight * i;
             const stacked = viewer.entities.add({
               name: entity.name?.getValue(Cesium.JulianDate.now()) || "Stacked",
               polygon: {
@@ -384,7 +384,7 @@ function processGeoJSON(data) {
               properties: entity.properties
             });
 
-            const typeKey = sub || "unknown";
+            const typeKey = sub || "SHENOBA";
             if (!subtypeEntityMap[typeKey]) subtypeEntityMap[typeKey] = [];
             subtypeEntityMap[typeKey].push(stacked);
           }
