@@ -221,6 +221,26 @@ export async function processGeoJSON(data, viewer) {
     }
   }
 
-  const treeData = buildJsTreeData(reprojected.features);
-  initializeJsTree(subtypeEntityMap, treeData);
+  const treeFeatures = [...reprojected.features];  // Clone original features
+
+// Inject synthetic Shenoba entries into tree
+for (const subtype in subtypeEntityMap) {
+  if (subtype === "shenoba") {
+    for (const ent of subtypeEntityMap[subtype]) {
+      treeFeatures.push({
+        properties: {
+          FLOOR: ent.properties?.FLOOR?.getValue(julianNow),
+          CADCODE: ent.properties?.CADCODE?.getValue(julianNow),
+          REG_N: ent.properties?.REG_N?.getValue(julianNow),
+          TYPE: "Building",
+          SUB_TYPE: "shenoba",
+        },
+      });
+    }
+  }
+}
+
+const treeData = buildJsTreeData(treeFeatures);
+initializeJsTree(subtypeEntityMap, treeData);
+
 }
