@@ -71,24 +71,33 @@ export async function processGeoJSON(data, viewer) {
 
       // SHENOBA stacking
       // const hasSubType = props?.SUB_TYPE?.getValue(julianNow);
-      if (sarTuli) {
-        viewer.entities.remove(entity);
-        for (let i = 0; i < sarTuli; i++) {
-          const stacked = viewer.entities.add({
-            name: `Shenoba Floor ${i + 1}`,
-            polygon: {
-              hierarchy,
-              height: base + (baseHeight * i),
-              extrudedHeight: base + (baseHeight * (i + 1)),
-              outline: true,
-              outlineColor: Cesium.Color.BLACK
-            },
-            properties: new Cesium.PropertyBag({ SARTULI: sarTuli, FLOOR: i + 1 })
-          });
-          (subtypeEntityMap["shenoba"] ||= []).push(stacked);
-        }
-        continue;
-      }
+      if (!isNaN(parseInt(sarTuli))) {
+  const floorCount = parseInt(sarTuli);
+  viewer.entities.remove(entity);
+
+  for (let i = 0; i < floorCount; i++) {
+    const stacked = viewer.entities.add({
+      name: `Floor ${i + 1}`,
+      polygon: {
+        hierarchy,
+        height: base + (baseHeight * i),
+        extrudedHeight: base + (baseHeight * (i + 1)),
+        material: Cesium.Color.WHITE.withAlpha(0.8),
+        outline: true,
+        outlineColor: Cesium.Color.BLACK
+      },
+      properties: new Cesium.PropertyBag({
+        ...entity.properties?.getValue?.(julianNow),
+        SARTULI: floorCount,
+        FLOOR: i + 1
+      })
+    });
+
+    (subtypeEntityMap[sub] ||= []).push(stacked);
+  }
+
+  continue;
+}
 
       switch (true) {
         case sub.includes("ked") || sub.includes("kol"):
