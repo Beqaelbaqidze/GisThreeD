@@ -604,12 +604,16 @@ async function processGeoJSON(data) {
 <head>
   <meta charset="utf-8" />
   <title>3D GeoJSON Viewer</title>
+
+  <!-- Cesium + jstree dependencies -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
   <style>
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "Segoe UI", sans-serif; }
     #mainContainer { display: flex; height: 100%; width: 100%; }
@@ -634,16 +638,19 @@ async function processGeoJSON(data) {
     </div>
   </div>
 
+  <!-- GeoJSON from backend -->
   <script>
     const inputGeojson = {{ geojson_data | safe }};
   </script>
 
+  <!-- Load JS modules correctly from FastAPI static path -->
   <script type="module">
-    import { initializeViewer } from './static/viewer.js';
-    import { processGeoJSON } from './static/geojsonLoader.js';
+    import { initializeViewer } from "{{ url_for('static/js', path='/viewer.js') }}";
+    import { processGeoJSON } from "{{ url_for('static/js', path='/geojsonLoader.js') }}";
 
     const viewer = await initializeViewer();
     await processGeoJSON(inputGeojson, viewer);
   </script>
 </body>
 </html>
+
