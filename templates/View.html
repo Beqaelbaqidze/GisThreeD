@@ -387,207 +387,204 @@
       //                 }
 async function processGeoJSON(data) {
   const reprojected = reprojectGeoJSON(data);
-  
- Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+
+  const dataSource = await Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false });
   viewer.scene.globe.depthTestAgainstTerrain = true;
+  viewer.dataSources.add(dataSource);
+  viewer.zoomTo(dataSource);
 
+  const entities = dataSource.entities.values;
+  const groupedEntities = {};
+  const julianNow = Cesium.JulianDate.now();
 
-    viewer.dataSources.add(dataSource);
-    viewer.zoomTo(dataSource);
+  for (let entity of entities) {
+    if (!entity.polygon) continue;
 
-    const entities = dataSource.entities.values;
-    const groupedEntities = {};
-    const julianNow = Cesium.JulianDate.now();
+    const props = entity.properties;
+    const cad = props?.CADCODE?.getValue(julianNow) || "";
+    const reg = props?.REG_N?.getValue(julianNow) || "";
+    const floor = props?.FLOOR?.getValue(julianNow) ?? "";
 
-    for (let entity of entities) {
+    if (!cad || !reg || floor === "") continue;
+
+    const key = `${floor}|${cad}|${reg}`;
+    if (!groupedEntities[key]) groupedEntities[key] = [];
+    groupedEntities[key].push(entity);
+  }
+
+  for (const key in groupedEntities) {
+    const group = groupedEntities[key];
+
+    // Find baseHeight from "kedeli" type
+    let baseHeight = 0;
+    for (let entity of group) {
+      const sub = entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
+      const height = parseFloat(entity.properties?.HEIGHT?.getValue(julianNow) || 0);
+      if (sub.includes("ked")) {
+        baseHeight = height;
+        break;
+      }
+    }
+
+    // Compute terrain height once per group (based on centroid of first polygon)
+    const firstEntity = group[0];
+    const hierarchy = firstEntity.polygon.hierarchy.getValue(julianNow);
+    const positions = hierarchy.positions;
+    const cartographic = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
+
+    let avgLon = 0, avgLat = 0;
+    for (const c of cartographic) {
+      avgLon += c.longitude;
+      avgLat += c.latitude;
+    }
+    avgLon /= cartographic.length;
+    avgLat /= cartographic.length;
+
+    const terrainSample = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+      new Cesium.Cartographic(avgLon, avgLat)
+    ]);
+    const terrainHeight = terrainSample[0].height || 0;
+
+    for (let entity of group) {
       if (!entity.polygon) continue;
 
       const props = entity.properties;
-      const cad = props?.CADCODE?.getValue(julianNow) || "";
-      const reg = props?.REG_N?.getValue(julianNow) || "";
-      const floor = props?.FLOOR?.getValue(julianNow) ?? "";
+      const rawSub = props?.SUB_TYPE?.getValue(julianNow) || "";
+      const sub = rawSub.trim().toLowerCase() || "unknown";
+      const height = parseFloat(props?.HEIGHT?.getValue(julianNow) || 0);
+      const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
+      const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
+      const base = terrainHeight + baseHeight * (floor - 1);
+      const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
 
-      if (!cad || !reg || floor === "") continue;
-      const key = `${floor}|${cad}|${reg}`;
+      props.SUB_TYPE = new Cesium.ConstantProperty(sub);
 
-      if (!groupedEntities[key]) groupedEntities[key] = [];
-      groupedEntities[key].push(entity);
-    }
+      if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
 
-  for (const key in groupedEntities) {
-  const group = groupedEntities[key];
-  let baseHeight = 0;
-      await Promise.all(group.map(async (entity) => {
-      
-
-      for (let entity of group) {
-        const sub = entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
-        const height = parseFloat(entity.properties?.HEIGHT?.getValue(julianNow) || 0);
-        if (sub.includes("ked")) {
-          baseHeight = height;
-          break;
+      if (!isNaN(sarTuli) && sarTuli > 1 && !rawSub) {
+        viewer.entities.remove(entity);
+        for (let i = 0; i < sarTuli; i++) {
+          const stacked = viewer.entities.add({
+            name: `Shenoba Floor ${i + 1}`,
+            polygon: {
+              hierarchy,
+              height: baseHeight * i + terrainHeight,
+              extrudedHeight: baseHeight * (i + 1) + terrainHeight,
+              material: Cesium.Color.fromHsl(i / sarTuli, 0.6, 0.5, 0.7),
+              outline: true,
+              outlineColor: Cesium.Color.BLACK
+            },
+            properties: new Cesium.PropertyBag({
+              SARTULI: sarTuli,
+              FLOOR: i + 1
+            })
+          });
+          (subtypeEntityMap["shenoba"] ||= []).push(stacked);
         }
+        continue;
       }
 
-      for (let entity of group) {
-        if (!entity.polygon) continue;
+      let poly = entity.polygon;
 
-        const props = entity.properties;
-        const rawSub = props?.SUB_TYPE?.getValue(julianNow) || "";
-        const sub = rawSub.trim().toLowerCase() || "unknown";
-        const height = parseFloat(props?.HEIGHT?.getValue(julianNow) || 0);
-        const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
-        const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
-        // Compute centroid
-const positions = hierarchy.positions || hierarchy.getValue(julianNow).positions;
-const cartographic = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
-let avgLon = 0, avgLat = 0;
-for (const c of cartographic) {
-  avgLon += c.longitude;
-  avgLat += c.latitude;
-}
-avgLon /= cartographic.length;
-avgLat /= cartographic.length;
+      if (sub.includes("ked") || sub.includes("kol")) {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + height,
+          material: Cesium.Color.GRAY.withAlpha(0.8),
+          outline: true,
+          outlineColor: Cesium.Color.YELLOW
+        });
 
-// Sample terrain
-const terrainSample = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
-  new Cesium.Cartographic(avgLon, avgLat)
-]);
+      } else if (sub.includes("kar")) {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + height,
+          material: Cesium.Color.BROWN.withAlpha(0.8)
+        });
 
-const terrainHeight = terrainSample[0].height || 0;
-const base = terrainHeight + (baseHeight * (floor - 1));
-
-        const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
-
-        props.SUB_TYPE = new Cesium.ConstantProperty(sub);
-
-        if (!isNaN(sarTuli) && sarTuli > 1 && !rawSub) {
-          viewer.entities.remove(entity);
-          for (let i = 0; i < sarTuli; i++) {
-            const stacked = viewer.entities.add({
-              name: `Shenoba Floor ${i + 1}`,
-              polygon: {
-                hierarchy,
-                height: baseHeight * i,
-                extrudedHeight: baseHeight * (i + 1),
-                material: Cesium.Color.fromHsl(i / sarTuli, 0.6, 0.5, 0.7),
-                outline: true,
-                outlineColor: Cesium.Color.BLACK
-              },
-              properties: new Cesium.PropertyBag({ SARTULI: sarTuli, FLOOR: i + 1 })
-            });
-
-            if (!subtypeEntityMap["shenoba"]) subtypeEntityMap["shenoba"] = [];
-            subtypeEntityMap["shenoba"].push(stacked);
-          }
-          continue;
-        }
-
-        let poly = entity.polygon;
-        if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-
-        if (sub.includes("ked") || sub.includes("kol")) {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + height,
+        const newEntity = viewer.entities.add({
+          name: entity.name?.getValue(julianNow) || "Object",
+          polygon: {
+            hierarchy,
+            height: base + height,
+            extrudedHeight: base + baseHeight,
             material: Cesium.Color.GRAY.withAlpha(0.8),
             outline: true,
             outlineColor: Cesium.Color.YELLOW
-          });
+          },
+          properties: props
+        });
+        subtypeEntityMap[sub].push(entity, newEntity);
+        continue;
 
-        } else if (sub.includes("kar")) {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + height,
-            material: Cesium.Color.BROWN.withAlpha(0.8)
-          });
+      } else if (sub.includes("fan")) {
+        const midStart = base + ((baseHeight - height) / 2) + 0.3;
+        const midEnd = midStart + height;
 
+        Object.assign(poly, {
+          height: midStart,
+          extrudedHeight: midEnd,
+          material: Cesium.Color.AQUA.withAlpha(0.8)
+        });
+
+        const parts = [
+          { height: midEnd, extrudedHeight: midEnd + ((baseHeight - height) / 2) - 0.3 },
+          { height: base, extrudedHeight: midStart }
+        ];
+
+        for (const part of parts) {
           const newEntity = viewer.entities.add({
             name: entity.name?.getValue(julianNow) || "Object",
             polygon: {
               hierarchy,
-              height: base + height,
-              extrudedHeight: base + baseHeight,
+              height: part.height,
+              extrudedHeight: part.extrudedHeight,
               material: Cesium.Color.GRAY.withAlpha(0.8),
               outline: true,
               outlineColor: Cesium.Color.YELLOW
             },
             properties: props
           });
-
-          subtypeEntityMap[sub].push(entity, newEntity);
-          continue;
-
-        } else if (sub.includes("fan")) {
-          const midStart = base + ((baseHeight - height) / 2) + 0.3;
-          const midEnd = midStart + height;
-
-          Object.assign(poly, {
-            height: midStart,
-            extrudedHeight: midEnd,
-            material: Cesium.Color.AQUA.withAlpha(0.8)
-          });
-
-          const parts = [
-            { height: midEnd, extrudedHeight: midEnd + ((baseHeight - height) / 2) - 0.3 },
-            { height: base, extrudedHeight: midStart }
-          ];
-
-          for (const part of parts) {
-            const newEntity = viewer.entities.add({
-              name: entity.name?.getValue(julianNow) || "Object",
-              polygon: {
-                hierarchy,
-                height: part.height,
-                extrudedHeight: part.extrudedHeight,
-                material: Cesium.Color.GRAY.withAlpha(0.8),
-                outline: true,
-                outlineColor: Cesium.Color.YELLOW
-              },
-              properties: props
-            });
-            subtypeEntityMap[sub].push(newEntity);
-          }
-
-        } else if (sub.includes("iat") || sub.includes("aiv")) {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + 0.1,
-            material: Cesium.Color.BLACK.withAlpha(0.5)
-          });
-
-        } else if (sub.includes("kib")) {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + 0.3,
-            material: Cesium.Color.BLUE.withAlpha(0.8)
-          });
-          viewer.entities.remove(entity);
-          continue;
-
-        } else if (sub.includes("lif")) {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + baseHeight,
-            material: Cesium.Color.PINK.withAlpha(0.8)
-          });
-
-        } else {
-          Object.assign(poly, {
-            height: base,
-            extrudedHeight: base + height,
-            material: Cesium.Color.RED.withAlpha(1)
-          });
+          subtypeEntityMap[sub].push(newEntity);
         }
 
-        subtypeEntityMap[sub].push(entity);
-      }
-    }));
-    }
+      } else if (sub.includes("iat") || sub.includes("aiv")) {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + 0.1,
+          material: Cesium.Color.BLACK.withAlpha(0.5)
+        });
 
-    const treeData = buildJsTreeData(reprojected.features);
-    initializeJsTree(treeData);
-  });
+      } else if (sub.includes("kib")) {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + 0.3,
+          material: Cesium.Color.BLUE.withAlpha(0.8)
+        });
+        viewer.entities.remove(entity);
+        continue;
+
+      } else if (sub.includes("lif")) {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + baseHeight,
+          material: Cesium.Color.PINK.withAlpha(0.8)
+        });
+
+      } else {
+        Object.assign(poly, {
+          height: base,
+          extrudedHeight: base + height,
+          material: Cesium.Color.RED.withAlpha(1)
+        });
+      }
+
+      subtypeEntityMap[sub].push(entity);
+    }
+  }
+
+  const treeData = buildJsTreeData(reprojected.features);
+  initializeJsTree(treeData);
 }
 
                                   (async () => {
