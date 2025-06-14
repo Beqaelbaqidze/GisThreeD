@@ -436,7 +436,25 @@ function processGeoJSON(data) {
         const height = parseFloat(props?.HEIGHT?.getValue(julianNow) || 0);
         const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
         const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
-        const base = baseHeight * (floor - 1);
+        // Compute centroid
+const positions = hierarchy.positions || hierarchy.getValue(julianNow).positions;
+const cartographic = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
+let avgLon = 0, avgLat = 0;
+for (const c of cartographic) {
+  avgLon += c.longitude;
+  avgLat += c.latitude;
+}
+avgLon /= cartographic.length;
+avgLat /= cartographic.length;
+
+// Sample terrain
+const terrainSample = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+  new Cesium.Cartographic(avgLon, avgLat)
+]);
+
+const terrainHeight = terrainSample[0].height || 0;
+const base = terrainHeight + (baseHeight * (floor - 1));
+
         const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
 
         props.SUB_TYPE = new Cesium.ConstantProperty(sub);
