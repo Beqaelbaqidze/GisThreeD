@@ -221,9 +221,6 @@ export async function processGeoJSON(data, viewer) {
     }
   }
 
-
-
-const treeData = buildJsTreeData(treeFeatures);
-initializeJsTree(subtypeEntityMap, treeData);
-
+  const treeData = buildJsTreeData(reprojected.features);
+  initializeJsTree(subtypeEntityMap, treeData);
 }
