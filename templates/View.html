@@ -545,8 +545,7 @@
                     material: Cesium.Color.RED.withAlpha(1)
                   });
                   entity.properties = entity.properties || new Cesium.PropertyBag();
-                  entity.properties.SUB_TYPE = new Cesium.ConstantProperty("Unknown");
-                  addEntityToSubtype(entity, "unknown");
+                  addEntityToSubtype(entity, sub);
               }
             }
           }
