@@ -547,6 +547,7 @@
                             break;
 
                           default:
+                            const sub = (props?.SUB_TYPE?.getValue(julianNow) || "").toLowerCase();
       Object.assign(polygon, {
         height: base,
         extrudedHeight: base + height,
