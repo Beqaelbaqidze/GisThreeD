@@ -645,8 +645,8 @@ async function processGeoJSON(data) {
 
   <!-- Load JS modules correctly from FastAPI static path -->
   <script type="module">
-    import { initializeViewer } from "{{ url_for('static/js', path='/viewer.js') }}";
-    import { processGeoJSON } from "{{ url_for('static/js', path='/geojsonLoader.js') }}";
+    import { initializeViewer } from "{{ url_for('static', path='/viewer.js') }}";
+    import { processGeoJSON } from "{{ url_for('static', path='/geojsonLoader.js') }}";
 
     const viewer = await initializeViewer();
     await processGeoJSON(inputGeojson, viewer);

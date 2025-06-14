@@ -1,5 +1,5 @@
-import { reprojectGeoJSON } from './utils.js';
-import { buildJsTreeData, initializeJsTree } from './tree.js';
+import { reprojectGeoJSON } from './js/utils.js';
+import { buildJsTreeData, initializeJsTree } from './js/tree.js';
 
 export async function processGeoJSON(data, viewer) {
   const reprojected = reprojectGeoJSON(data);
