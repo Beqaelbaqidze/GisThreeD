@@ -24,10 +24,8 @@ export async function processGeoJSON(data, viewer) {
     if (sarTuli > 1) {
       if (!props.CADCODE)
         props.CADCODE = new Cesium.ConstantProperty("AUTO_CAD");
-      if (!props.REG_N)
-        props.REG_N = new Cesium.ConstantProperty("AUTO_REG");
-      if (!props.FLOOR)
-        props.FLOOR = new Cesium.ConstantProperty(1);
+      if (!props.REG_N) props.REG_N = new Cesium.ConstantProperty("AUTO_REG");
+      if (!props.FLOOR) props.FLOOR = new Cesium.ConstantProperty(1);
     }
   }
 
@@ -50,8 +48,11 @@ export async function processGeoJSON(data, viewer) {
     // Base height from "ked"
     let baseHeight = 3;
     for (let entity of group) {
-      const sub = entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
-      const height = parseFloat(entity.properties?.HEIGHT?.getValue(julianNow) || 0);
+      const sub =
+        entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
+      const height = parseFloat(
+        entity.properties?.HEIGHT?.getValue(julianNow) || 0
+      );
       if (sub.includes("ked")) {
         baseHeight = height;
         break;
@@ -61,12 +62,18 @@ export async function processGeoJSON(data, viewer) {
     // Terrain height from first polygon
     const hierarchy = group[0].polygon.hierarchy.getValue(julianNow);
     const positions = hierarchy.positions;
-    const cartographic = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
-    const avgLon = cartographic.reduce((sum, c) => sum + c.longitude, 0) / cartographic.length;
-    const avgLat = cartographic.reduce((sum, c) => sum + c.latitude, 0) / cartographic.length;
-    const terrainSample = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
-      new Cesium.Cartographic(avgLon, avgLat),
-    ]);
+    const cartographic =
+      Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
+    const avgLon =
+      cartographic.reduce((sum, c) => sum + c.longitude, 0) /
+      cartographic.length;
+    const avgLat =
+      cartographic.reduce((sum, c) => sum + c.latitude, 0) /
+      cartographic.length;
+    const terrainSample = await Cesium.sampleTerrainMostDetailed(
+      viewer.terrainProvider,
+      [new Cesium.Cartographic(avgLon, avgLat)]
+    );
     const terrainHeight = terrainSample[0].height || 0;
 
     // Build once per group (for SARTULI)
@@ -189,6 +196,34 @@ export async function processGeoJSON(data, viewer) {
             height: base,
             extrudedHeight: base + 0.1,
             material: Cesium.Color.BLACK.withAlpha(0.5),
+          });
+
+          // Add label separately
+          const centroid = Cesium.BoundingSphere.fromPoints(
+            hierarchy.positions
+          ).center;
+          const cartographic = Cesium.Cartographic.fromCartesian(centroid);
+          const labelLonLat = Cesium.Ellipsoid.WGS84.cartographicToCartesian(
+            new Cesium.Cartographic(
+              cartographic.longitude,
+              cartographic.latitude,
+              base + 0.1
+            )
+          );
+
+          viewer.entities.add({
+            position: labelLonLat,
+            label: {
+              text: `${props?.Shape_Area?.getValue(julianNow) || "0"} მ²`,
+              font: "14px sans-serif",
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            },
           });
           break;
 
