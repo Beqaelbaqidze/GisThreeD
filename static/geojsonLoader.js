@@ -88,11 +88,11 @@ export async function processGeoJSON(data, viewer) {
             outlineColor: Cesium.Color.BLACK,
           },
           properties: new Cesium.PropertyBag({
-            SARTULI: sarTuli
-            // FLOOR: i + 1
-            // CADCODE: firstProps?.CADCODE?.getValue(julianNow),
-            // REG_N: firstProps?.REG_N?.getValue(julianNow)
-            // SUB_TYPE: "shenoba",
+            SARTULI: sarTuli,
+            FLOOR: i + 1,
+            CADCODE: firstProps?.CADCODE?.getValue(julianNow),
+            REG_N: firstProps?.REG_N?.getValue(julianNow),
+            SUB_TYPE: "shenoba",
           }),
         });
 
