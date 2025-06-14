@@ -16,6 +16,21 @@ export async function processGeoJSON(data, viewer) {
   const subtypeEntityMap = {};
   const julianNow = Cesium.JulianDate.now();
 
+  // Preprocess: fill missing props if SARTULI exists
+  for (let entity of entities) {
+    const props = entity.properties;
+    const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
+
+    if (sarTuli > 1) {
+      if (!props.CADCODE)
+        props.CADCODE = new Cesium.ConstantProperty("AUTO_CAD");
+      if (!props.REG_N)
+        props.REG_N = new Cesium.ConstantProperty("AUTO_REG");
+      if (!props.FLOOR)
+        props.FLOOR = new Cesium.ConstantProperty(1);
+    }
+  }
+
   // Grouping
   for (let entity of entities) {
     if (!entity.polygon) continue;
@@ -24,7 +39,7 @@ export async function processGeoJSON(data, viewer) {
     const reg = props?.REG_N?.getValue(julianNow) || "";
     const floor = props?.FLOOR?.getValue(julianNow) ?? "";
     if (!cad || !reg || floor === "") continue;
-    const key = `${floor}|${cad}|${reg}`;
+    const key = `${cad}|${reg}`;
     if (!groupedEntities[key]) groupedEntities[key] = [];
     groupedEntities[key].push(entity);
   }
@@ -33,54 +48,31 @@ export async function processGeoJSON(data, viewer) {
     const group = groupedEntities[key];
 
     // Base height from "ked"
-    let baseHeight = 0;
+    let baseHeight = 3;
     for (let entity of group) {
-      const sub =
-        entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
-      const height = parseFloat(
-        entity.properties?.HEIGHT?.getValue(julianNow) || 0
-      );
+      const sub = entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
+      const height = parseFloat(entity.properties?.HEIGHT?.getValue(julianNow) || 0);
       if (sub.includes("ked")) {
         baseHeight = height;
         break;
       }
     }
 
-    // Terrain height
+    // Terrain height from first polygon
     const hierarchy = group[0].polygon.hierarchy.getValue(julianNow);
     const positions = hierarchy.positions;
-    const cartographic =
-      Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
-    const avgLon =
-      cartographic.reduce((sum, c) => sum + c.longitude, 0) /
-      cartographic.length;
-    const avgLat =
-      cartographic.reduce((sum, c) => sum + c.latitude, 0) /
-      cartographic.length;
-    const terrainSample = await Cesium.sampleTerrainMostDetailed(
-      viewer.terrainProvider,
-      [new Cesium.Cartographic(avgLon, avgLat)]
-    );
+    const cartographic = Cesium.Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
+    const avgLon = cartographic.reduce((sum, c) => sum + c.longitude, 0) / cartographic.length;
+    const avgLat = cartographic.reduce((sum, c) => sum + c.latitude, 0) / cartographic.length;
+    const terrainSample = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+      new Cesium.Cartographic(avgLon, avgLat),
+    ]);
     const terrainHeight = terrainSample[0].height || 0;
 
-    for (let entity of group) {
-      if (!entity.polygon) continue;
-
-      const props = entity.properties;
-      const rawSub = props?.SUB_TYPE?.getValue(julianNow) || "";
-      const sub = rawSub.trim().toLowerCase() || "unknown";
-      const height = parseFloat(props?.HEIGHT?.getValue(julianNow) || 0);
-      const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
-      const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
-      const base = terrainHeight + baseHeight * (floor - 1);
-      const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
-
-      props.SUB_TYPE = new Cesium.ConstantProperty(sub);
-      if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
-
-      const poly = entity.polygon;
-
-      // SHENOBA stacking
+    // Build once per group (for SARTULI)
+    const firstProps = group[0].properties;
+    const sarTuli = parseInt(firstProps?.SARTULI?.getValue(julianNow) || 0);
+    if (sarTuli > 1) {
       for (let i = 0; i < sarTuli; i++) {
         const floorBase = terrainHeight + baseHeight * i;
         const floorTop = terrainHeight + baseHeight * (i + 1);
@@ -98,14 +90,32 @@ export async function processGeoJSON(data, viewer) {
           properties: new Cesium.PropertyBag({
             SARTULI: sarTuli,
             FLOOR: i + 1,
-            CADCODE: props?.CADCODE?.getValue(julianNow),
-            REG_N: props?.REG_N?.getValue(julianNow),
+            CADCODE: firstProps?.CADCODE?.getValue(julianNow),
+            REG_N: firstProps?.REG_N?.getValue(julianNow),
             SUB_TYPE: "shenoba",
           }),
         });
 
         (subtypeEntityMap["shenoba"] ||= []).push(stacked);
       }
+    }
+
+    // All regular features
+    for (let entity of group) {
+      if (!entity.polygon) continue;
+
+      const props = entity.properties;
+      const rawSub = props?.SUB_TYPE?.getValue(julianNow) || "";
+      const sub = rawSub.trim().toLowerCase() || "unknown";
+      const height = parseFloat(props?.HEIGHT?.getValue(julianNow) || 0);
+      const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
+      const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
+      const base = terrainHeight + baseHeight * (floor - 1);
+
+      props.SUB_TYPE = new Cesium.ConstantProperty(sub);
+      if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
+
+      const poly = entity.polygon;
 
       switch (true) {
         case sub.includes("ked") || sub.includes("kol"):
