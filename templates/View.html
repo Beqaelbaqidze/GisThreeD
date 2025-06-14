@@ -414,9 +414,11 @@ function processGeoJSON(data) {
       groupedEntities[key].push(entity);
     }
 
-    for (const key in groupedEntities) {
-      const group = groupedEntities[key];
-      let baseHeight = 0;
+  for (const key in groupedEntities) {
+  const group = groupedEntities[key];
+  let baseHeight = 0;
+      await Promise.all(group.map(async (entity) => {
+      
 
       for (let entity of group) {
         const sub = entity.properties?.SUB_TYPE?.getValue(julianNow)?.toLowerCase() || "";
@@ -580,6 +582,7 @@ const base = terrainHeight + (baseHeight * (floor - 1));
 
         subtypeEntityMap[sub].push(entity);
       }
+    }));
     }
 
     const treeData = buildJsTreeData(reprojected.features);
