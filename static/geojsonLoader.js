@@ -70,8 +70,8 @@ export async function processGeoJSON(data, viewer) {
       const poly = entity.polygon;
 
       // SHENOBA stacking
-      const hasSubType = props?.SUB_TYPE?.getValue(julianNow);
-      if (!isNaN(sarTuli) && sarTuli > 1 && (!hasSubType || hasSubType === "")) {
+      // const hasSubType = props?.SUB_TYPE?.getValue(julianNow);
+      if (!isNaN(sarTuli) && sarTuli > 1) {
         viewer.entities.remove(entity);
         for (let i = 0; i < sarTuli; i++) {
           const stacked = viewer.entities.add({
