@@ -75,7 +75,7 @@
                                   Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YzYxNGM1Yy0wZjU0LTRkZWEtYTZhMy04NGRkM2Q3Y2EwM2MiLCJpZCI6MjAxOTE1LCJpYXQiOjE3MTA0MTQxNjJ9.ESJo3qUQ0CIMEgeSHMDIUHeZEGo5yUFnP5XMut8OU2o';
 
                                   const viewer = new Cesium.Viewer("cesiumContainer", {
-                                    terrainProvider: Cesium.createWorldTerrain(),
+                                    terrainProvider: Cesium.createWorldTerrainAsync(),
                                     animation: false,
                                     timeline: false,
                                     baseLayerPicker: false,
