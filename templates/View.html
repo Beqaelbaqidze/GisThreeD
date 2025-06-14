@@ -461,28 +461,28 @@ async function processGeoJSON(data) {
 
       if (!subtypeEntityMap[sub]) subtypeEntityMap[sub] = [];
 
-      if (!isNaN(sarTuli) && sarTuli > 1 && !rawSub) {
-        viewer.entities.remove(entity);
-        for (let i = 0; i < sarTuli; i++) {
-          const stacked = viewer.entities.add({
-            name: `Shenoba Floor ${i + 1}`,
-            polygon: {
-              hierarchy,
-              height: baseHeight * i + terrainHeight,
-              extrudedHeight: baseHeight * (i + 1) + terrainHeight,
-              // material: Cesium.Color.fromHsl(i / sarTuli, 0.6, 0.5, 0.7),
-              outline: true,
-              outlineColor: Cesium.Color.BLACK
-            },
-            properties: new Cesium.PropertyBag({
-              SARTULI: sarTuli,
-              FLOOR: i + 1
-            })
-          });
-          (subtypeEntityMap["shenoba"] ||= []).push(stacked);
-        }
-        continue;
-      }
+     if (!isNaN(sarTuli) && sarTuli > 1 && (!hasSubType || hasSubType === "")) {
+                                viewer.entities.remove(entity);
+                                for (let i = 0; i < sarTuli; i++) {
+                                  const stacked = viewer.entities.add({
+                                    name: `Shenoba Floor ${i + 1}`,
+                                    polygon: {
+                                      hierarchy,
+                                      height: base + (baseHeight * i),
+                                      extrudedHeight:base + (baseHeight * (i + 1)),
+                                      // material: Cesium.Color.fromHsl(i / sarTuli, 0.6, 0.5, 0.7),
+                                      outline: true,
+                                      outlineColor: Cesium.Color.BLACK
+                                    },
+                                    properties: new Cesium.PropertyBag({
+                                      SARTULI: sarTuli,
+                                      FLOOR: i + 1
+                                    })
+                                  });
+                                  (subtypeEntityMap["SHENOBA"] ||= []).push(stacked);
+                                }
+                                continue;
+                              }
 
       let poly = entity.polygon;
 
