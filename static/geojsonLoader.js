@@ -62,6 +62,7 @@ export async function processGeoJSON(data, viewer) {
       const floor = parseInt(props?.FLOOR?.getValue(julianNow) || 0);
       const hierarchy = entity.polygon.hierarchy.getValue(julianNow);
       const base = terrainHeight + baseHeight * (floor - 1);
+      const ForStart = terrainHeight
       const sarTuli = parseInt(props?.SARTULI?.getValue(julianNow) || 0);
 
       props.SUB_TYPE = new Cesium.ConstantProperty(sub);
@@ -80,8 +81,8 @@ export async function processGeoJSON(data, viewer) {
       name: `Floor ${i + 1}`,
       polygon: {
         hierarchy,
-        height: base + (baseHeight * i),
-        extrudedHeight: base + (baseHeight * (i + 1)),
+        height: ForStart + (baseHeight * i),
+        extrudedHeight: ForStart + (baseHeight * (i + 1)),
         material: Cesium.Color.WHITE.withAlpha(0.8),
         outline: true,
         outlineColor: Cesium.Color.BLACK
