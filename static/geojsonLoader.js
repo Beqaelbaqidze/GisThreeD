@@ -78,8 +78,8 @@ export async function processGeoJSON(data, viewer) {
             name: `Shenoba Floor ${i + 1}`,
             polygon: {
               hierarchy,
-              height: base + baseHeight * i,
-              extrudedHeight: base + baseHeight * (i + 1),
+              height: base + (baseHeight * i),
+              extrudedHeight: base + (baseHeight * (i + 1)),
               outline: true,
               outlineColor: Cesium.Color.BLACK
             },
