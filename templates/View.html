@@ -569,7 +569,13 @@ function processGeoJSON(data) {
   });
 }
 
-                                  processGeoJSON(inputGeojson);
+                                  (async () => {
+  const terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+  viewer.scene.setTerrain(new Cesium.Terrain(terrainProvider));
+  viewer.scene.globe.depthTestAgainstTerrain = true;
+
+  processGeoJSON(inputGeojson);
+})();
     </script>
   </body>
 </html>
