@@ -20,7 +20,7 @@ export async function initializeViewer() {
 
   viewer.scene.backgroundColor = Cesium.Color.WHITE;
   viewer.scene.setTerrain(new Cesium.Terrain(viewer.terrainProvider));
-  viewer.scene.globe.depthTestAgainstTerrain = true;
+  viewer.scene.globe.depthTestAgainstTerrain = false;
 
   proj4.defs("EPSG:32638", "+proj=utm +zone=38 +datum=WGS84 +units=m +no_defs");
 
