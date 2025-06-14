@@ -46,19 +46,27 @@ export function initializeJsTree(subtypeEntityMap, treeData) {
   });
 
   $('#jstree-panel').on('changed.jstree', function (e, data) {
-    const visibleSubtypes = new Set();
-    data.selected.forEach(id => {
-      if (id.includes("subtype:")) {
-        const subtype = id.split("subtype:")[1].toLowerCase();
-        visibleSubtypes.add(subtype);
-      }
-    });
+  const selectedIds = new Set(data.selected);
 
-    for (const subtype in subtypeEntityMap) {
-      const visible = visibleSubtypes.size === 0 || visibleSubtypes.has(subtype);
-      subtypeEntityMap[subtype].forEach(ent => ent.show = visible);
+  for (const subtype in subtypeEntityMap) {
+    for (const ent of subtypeEntityMap[subtype]) {
+      const floor = ent.properties?.FLOOR?.getValue?.() ?? null;
+      const type = ent.properties?.SUB_TYPE?.getValue?.().toLowerCase?.() ?? "";
+
+      // Handle SHENOBA subtype
+      if (type === "shenoba") {
+        const floorId = `shenoba-root/floor:${floor}`;
+        ent.show = selectedIds.has("shenoba-root") || selectedIds.has(floorId);
+      }
+      // Handle all others via "subtype:"
+      else {
+        const subtypeId = `subtype:${type}`;
+        ent.show = selectedIds.has(subtypeId) || selectedIds.size === 0;
+      }
     }
-  });
+  }
+});
+
 
   // Show all by default
   for (const subtype in subtypeEntityMap) {
