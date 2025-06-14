@@ -385,7 +385,7 @@
       //                     initializeJsTree(treeData);
       //                   });
       //                 }
-function processGeoJSON(data) {
+async function processGeoJSON(data) {
   const reprojected = reprojectGeoJSON(data);
   
  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
