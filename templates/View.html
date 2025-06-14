@@ -387,7 +387,11 @@
       //                 }
 function processGeoJSON(data) {
   const reprojected = reprojectGeoJSON(data);
-  Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: true }).then(dataSource => {
+  
+ Cesium.GeoJsonDataSource.load(reprojected, { clampToGround: false }).then(dataSource => {
+  viewer.scene.globe.depthTestAgainstTerrain = true;
+
+
     viewer.dataSources.add(dataSource);
     viewer.zoomTo(dataSource);
 
