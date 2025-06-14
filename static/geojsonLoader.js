@@ -240,38 +240,7 @@ for (const subtype in subtypeEntityMap) {
   }
 }
 
-const treeData = buildJsTreeData(reprojected.features);
-
-// ✅ Add "SHENOBA" and its floors as tree nodes
-if (subtypeEntityMap["shenoba"]) {
-  const floorsSet = new Set();
-
-  for (const entity of subtypeEntityMap["shenoba"]) {
-    const floor = entity.properties?.FLOOR?.getValue(julianNow);
-    if (floor !== undefined && floor !== null) {
-      floorsSet.add(floor);
-    }
-  }
-
-  const shenobaRootId = "shenoba-root";
-  treeData.push({
-    id: shenobaRootId,
-    parent: "#",
-    text: "SHENOBA",
-    state: { opened: true }
-  });
-
-  for (const floor of [...floorsSet].sort((a, b) => a - b)) {
-    treeData.push({
-      id: `shenoba-floor-${floor}`,
-      parent: shenobaRootId,
-      text: `Floor ${floor}`,
-      state: { opened: true }
-    });
-  }
-}
-
+const treeData = buildJsTreeData(treeFeatures);
 initializeJsTree(subtypeEntityMap, treeData);
-
 
 }
