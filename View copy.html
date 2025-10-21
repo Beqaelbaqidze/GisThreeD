@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>3D GeoJSON Viewer</title>
+
+  <!-- Cesium + jstree dependencies -->
+   <link rel="stylesheet" href="tree.css">
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
+
+</head>
+<body>
+  <div id="loading">Loading GeoJSON...</div>
+  <div id="error"></div>
+  
+  <div id="mainContainer">
+    <div id="sidebar">
+      <h4>GeoJSON Structure</h4>
+      <div id="jstree-panel"></div>
+    </div>
+    <div id="cesiumContainer"></div>
+    
+  </div>
+<script type="module">
+  import { initializeViewer } from "./viewer.js";
+  import { processGeoJSON } from "./geojsonLoader.js";
+
+  const loading = document.getElementById('loading');
+  const errorDiv = document.getElementById('error');
+  const geojsonUrl = 'unit_polygon.geojson';
+  
+  async function loadAndDisplay() {
+    try {
+      loading.style.display = 'block';
+      
+      // Fetch GeoJSON
+      const response = await fetch(geojsonUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GeoJSON: ${response.status} ${response.statusText}`);
+      }
+      
+      const geojsonData = await response.json();
+      
+      // Initialize viewer and process data
+      const viewer = await initializeViewer();
+      window.cesiumViewer = viewer; // Make viewer globally accessible
+      await processGeoJSON(geojsonData, viewer);
+      
+      loading.style.display = 'none';
+      
+    } catch (error) {
+      console.error('Error:', error);
+      loading.style.display = 'none';
+      errorDiv.textContent = error.message;
+      errorDiv.style.display = 'block';
+    }
+  }
+  
+  loadAndDisplay();
+</script>
+</body>
+</html>

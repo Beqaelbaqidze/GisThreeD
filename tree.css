@@ -1,0 +1,215 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+body {
+    line-height: 1;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+
+blockquote,
+q {
+    quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+    content: '';
+    content: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Segoe UI", sans-serif;
+}
+
+#mainContainer {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+#cesiumContainer {
+    flex-grow: 1;
+    background: white;
+}
+
+#sidebar {
+    width: 340px;
+    color: #1e1e1e;
+    background: #f0f0f0;
+    overflow-y: auto;
+    border-left: 2px solid #333;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#sidebar h4 {
+    margin: 10px 0;
+    font-size: 18px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.jstree-anchor {
+    color: #1e1e1e !important;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: #444;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    font-size: 16px;
+}
+
+#error {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(220, 38, 38, 0.95);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    z-index: 1000;
+    display: none;
+    max-width: 80%;
+}

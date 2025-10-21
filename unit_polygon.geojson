@@ -1,0 +1,1093 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2441.3382000001147,
+              360.35869999974966
+            ],
+            [
+              2441.2384000001475,
+              360.35280000045896
+            ],
+            [
+              2441.2324999999255,
+              360.4527000002563
+            ],
+            [
+              2441.3322999998927,
+              360.458599999547
+            ],
+            [
+              2441.3382000001147,
+              360.35869999974966
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.400096637973,
+        "Shape_Area": 0.0100048299736,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2443.933699999936,
+              360.5112999994308
+            ],
+            [
+              2443.8338999999687,
+              360.50540000014007
+            ],
+            [
+              2443.8279999997467,
+              360.6052000001073
+            ],
+            [
+              2443.927899999544,
+              360.611099999398
+            ],
+            [
+              2443.933699999936,
+              360.5112999994308
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.399990960591,
+        "Shape_Area": 0.00999954498264,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2446.42949999962,
+              360.6580999996513
+            ],
+            [
+              2446.3295999998227,
+              360.6522000003606
+            ],
+            [
+              2446.3236999996006,
+              360.75210000015795
+            ],
+            [
+              2446.4236000003293,
+              360.75799999944866
+            ],
+            [
+              2446.42949999962,
+              360.6580999996513
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.400296290273,
+        "Shape_Area": 0.0100148200004,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2448.9252000004053,
+              360.80489999987185
+            ],
+            [
+              2448.8251999998465,
+              360.79900000058115
+            ],
+            [
+              2448.819400000386,
+              360.89880000054836
+            ],
+            [
+              2448.9193000001833,
+              360.90469999983907
+            ],
+            [
+              2448.9252000004053,
+              360.80489999987185
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.40019061324,
+        "Shape_Area": 0.0100095250094,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2451.420800000429,
+              360.9517000000924
+            ],
+            [
+              2451.3208999997005,
+              360.9458000008017
+            ],
+            [
+              2451.31500000041,
+              361.045700000599
+            ],
+            [
+              2451.4150000000373,
+              361.05159999988973
+            ],
+            [
+              2451.420800000429,
+              360.9517000000924
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.400390270502,
+        "Shape_Area": 0.0100195199924,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2453.3174999998882,
+              361.06320000067353
+            ],
+            [
+              2453.217699999921,
+              361.0572999995202
+            ],
+            [
+              2453.211799999699,
+              361.1571999993175
+            ],
+            [
+              2453.3117000004277,
+              361.16300000064075
+            ],
+            [
+              2453.3174999998882,
+              361.06320000067353
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kolona",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 0.400084941568,
+        "Shape_Area": 0.0100042450293,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2453.3117000004277,
+              361.16300000064075
+            ],
+            [
+              2453.211799999699,
+              361.1571999993175
+            ],
+            [
+              2453.217699999921,
+              361.0572999995202
+            ],
+            [
+              2453.3174999998882,
+              361.06320000067353
+            ],
+            [
+              2453.335099999793,
+              360.7636999990791
+            ],
+            [
+              2451.3386000003666,
+              360.64640000090003
+            ],
+            [
+              2451.3208999997005,
+              360.9458000008017
+            ],
+            [
+              2451.420800000429,
+              360.9517000000924
+            ],
+            [
+              2451.4150000000373,
+              361.05159999988973
+            ],
+            [
+              2451.31500000041,
+              361.045700000599
+            ],
+            [
+              2451.3208999997005,
+              360.9458000008017
+            ],
+            [
+              2448.9252000004053,
+              360.80489999987185
+            ],
+            [
+              2448.9193000001833,
+              360.90469999983907
+            ],
+            [
+              2448.819400000386,
+              360.89880000054836
+            ],
+            [
+              2448.8251999998465,
+              360.79900000058115
+            ],
+            [
+              2446.42949999962,
+              360.6580999996513
+            ],
+            [
+              2446.4236000003293,
+              360.75799999944866
+            ],
+            [
+              2446.3236999996006,
+              360.75210000015795
+            ],
+            [
+              2446.3295999998227,
+              360.6522000003606
+            ],
+            [
+              2443.933699999936,
+              360.5112999994308
+            ],
+            [
+              2443.927899999544,
+              360.611099999398
+            ],
+            [
+              2443.8279999997467,
+              360.6052000001073
+            ],
+            [
+              2443.8338999999687,
+              360.50540000014007
+            ],
+            [
+              2441.3382000001147,
+              360.35869999974966
+            ],
+            [
+              2441.3322999998927,
+              360.458599999547
+            ],
+            [
+              2441.2324999999255,
+              360.4527000002563
+            ],
+            [
+              2441.1650000000373,
+              361.600700000301
+            ],
+            [
+              2453.244099999778,
+              362.3111000005156
+            ],
+            [
+              2453.3117000004277,
+              361.16300000064075
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "aivani",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 28.5004634083,
+        "Shape_Area": 15.6655878144,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2453.963399999775,
+              362.8541999999434
+            ],
+            [
+              2421.349799999967,
+              360.9362000003457
+            ],
+            [
+              2421.2048000004143,
+              363.4019000008702
+            ],
+            [
+              2453.818400000222,
+              365.320000000298
+            ],
+            [
+              2453.963399999775,
+              362.8541999999434
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 70.2799252061,
+        "Shape_Area": 80.6951014629,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2432.050699999556,
+              364.54059999994934
+            ],
+            [
+              2421.1754000000656,
+              363.90100000053644
+            ],
+            [
+              2420.8273000000045,
+              369.8209000006318
+            ],
+            [
+              2431.7024999996647,
+              370.4604000002146
+            ],
+            [
+              2432.050699999556,
+              364.54059999994934
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 33.6482353358,
+        "Shape_Area": 64.6025080443,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2435.707499999553,
+              364.75569999963045
+            ],
+            [
+              2432.3003000002354,
+              364.55529999919236
+            ],
+            [
+              2431.9519999995828,
+              370.47499999962747
+            ],
+            [
+              2435.359400000423,
+              370.67540000006557
+            ],
+            [
+              2435.707499999553,
+              364.75569999963045
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 18.6862399628,
+        "Shape_Area": 20.2399730921,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2443.506900000386,
+              365.21429999917746
+            ],
+            [
+              2435.9571000002325,
+              364.7704000007361
+            ],
+            [
+              2435.6089000003412,
+              370.6900999993086
+            ],
+            [
+              2443.211099999957,
+              372.0974000003189
+            ],
+            [
+              2443.506900000386,
+              365.21429999917746
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 28.1135841205,
+        "Shape_Area": 48.7950495982,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2450.844200000167,
+              365.6459999997169
+            ],
+            [
+              2443.756400000304,
+              365.2290000002831
+            ],
+            [
+              2443.408300000243,
+              371.14880000054836
+            ],
+            [
+              2450.4960000002757,
+              371.565700000152
+            ],
+            [
+              2450.844200000167,
+              365.6459999997169
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 26.0599642584,
+        "Shape_Area": 42.102869207,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2453.7890999997035,
+              365.81909999996424
+            ],
+            [
+              2451.093700000085,
+              365.66070000082254
+            ],
+            [
+              2450.745600000024,
+              371.580399999395
+            ],
+            [
+              2453.4408999998122,
+              371.73880000039935
+            ],
+            [
+              2453.7890999997035,
+              365.81909999996424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "iataki",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "gamoyenebuli farTobi",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 17.2598585656,
+        "Shape_Area": 16.0108103519,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2424.5833999998868,
+              370.54260000027716
+            ],
+            [
+              2424.6101999999955,
+              370.04329999908805
+            ],
+            [
+              2420.8273000000045,
+              369.8209000006318
+            ],
+            [
+              2421.1754000000656,
+              363.90100000053644
+            ],
+            [
+              2424.927199999802,
+              364.1217000000179
+            ],
+            [
+              2424.9538000002503,
+              363.6224000006914
+            ],
+            [
+              2421.2048000004143,
+              363.4019000008702
+            ],
+            [
+              2421.349799999967,
+              360.9362000003457
+            ],
+            [
+              2453.963399999775,
+              362.8541999999434
+            ],
+            [
+              2453.818400000222,
+              365.320000000298
+            ],
+            [
+              2428.278199999593,
+              363.81780000030994
+            ],
+            [
+              2428.2712000003085,
+              364.3183999992907
+            ],
+            [
+              2432.050699999556,
+              364.54059999994934
+            ],
+            [
+              2431.7024999996647,
+              370.4604000002146
+            ],
+            [
+              2428.188199999742,
+              370.2536999993026
+            ],
+            [
+              2428.181099999696,
+              370.7542000003159
+            ],
+            [
+              2453.910699999891,
+              372.2674000002444
+            ],
+            [
+              2454.49199999962,
+              362.38450000062585
+            ],
+            [
+              2453.244099999778,
+              362.3111000005156
+            ],
+            [
+              2441.1650000000373,
+              361.600700000301
+            ],
+            [
+              2420.8800999997184,
+              360.4077000003308
+            ],
+            [
+              2420.2987999999896,
+              370.29059999994934
+            ],
+            [
+              2424.5833999998868,
+              370.54260000027716
+            ]
+          ],
+          [
+            [
+              2435.707499999553,
+              364.75569999963045
+            ],
+            [
+              2435.359400000423,
+              370.67540000006557
+            ],
+            [
+              2431.9519999995828,
+              370.47499999962747
+            ],
+            [
+              2432.3003000002354,
+              364.55529999919236
+            ],
+            [
+              2435.707499999553,
+              364.75569999963045
+            ]
+          ],
+          [
+            [
+              2435.6089000003412,
+              370.6900999993086
+            ],
+            [
+              2435.9571000002325,
+              364.7704000007361
+            ],
+            [
+              2443.506900000386,
+              365.21429999917746
+            ],
+            [
+              2443.1585999997333,
+              371.1341999992728
+            ],
+            [
+              2435.6089000003412,
+              370.6900999993086
+            ]
+          ],
+          [
+            [
+              2443.408300000243,
+              371.14880000054836
+            ],
+            [
+              2443.756400000304,
+              365.2290000002831
+            ],
+            [
+              2450.844200000167,
+              365.6459999997169
+            ],
+            [
+              2450.4960000002757,
+              371.565700000152
+            ],
+            [
+              2443.408300000243,
+              371.14880000054836
+            ]
+          ],
+          [
+            [
+              2450.745600000024,
+              371.580399999395
+            ],
+            [
+              2451.093700000085,
+              365.66070000082254
+            ],
+            [
+              2453.7890999997035,
+              365.81909999996424
+            ],
+            [
+              2453.4408999998122,
+              371.73880000039935
+            ],
+            [
+              2450.745600000024,
+              371.580399999395
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "kedeli",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 3.0,
+        "Shape_Leng": 268.193013794,
+        "Shape_Area": 61.368723344,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2428.278199999593,
+              363.81780000030994
+            ],
+            [
+              2424.9538000002503,
+              363.6224000006914
+            ],
+            [
+              2424.927199999802,
+              364.1217000000179
+            ],
+            [
+              2428.2712000003085,
+              364.3183999992907
+            ],
+            [
+              2428.278199999593,
+              363.81780000030994
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "karebi",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 2.2,
+        "Shape_Leng": 7.68057472531,
+        "Shape_Area": 1.6702269271,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2428.188199999742,
+              370.2536999993026
+            ],
+            [
+              2424.6101999999955,
+              370.04329999908805
+            ],
+            [
+              2424.5833999998868,
+              370.54260000027716
+            ],
+            [
+              2428.181099999696,
+              370.7542000003159
+            ],
+            [
+              2428.188199999742,
+              370.2536999993026
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "BULDING_ID": "01",
+        "FLAT": "N/A",
+        "CONDITION": "aSenebuli",
+        "NOTE_": "",
+        "UNIT_USE": "saxli",
+        "ENTRANCE": "N/A",
+        "SUB_TYPE": "fanjara",
+        "INT_PER_ID": "beqa elbaqiZe (01005040476)",
+        "MEASUR_ID": "beqa elbaqiZe (01005040476)",
+        "LEGAL_DOC": "dokumentis gareSe",
+        "REG_N": "882025171717",
+        "CADCODE": "01.12.13",
+        "UNIT_CODE": "N/A",
+        "TYPE": "konstruqcia",
+        "FLOOR": 1.0,
+        "HEIGHT": 1.6,
+        "Shape_Leng": 8.1886672022,
+        "Shape_Area": 1.79714266886,
+        "Devided_ID": "test1",
+        "Devided_Fi": "test123"
+      }
+    }
+  ]
+}

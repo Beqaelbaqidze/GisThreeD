@@ -26,7 +26,7 @@ export function buildJsTreeData(features) {
         idSet.add(path);
         treeData.push({
           id: path,
-          parent,
+          parent: parent,
           text: level.label,
           state: { opened: true }
         });
@@ -39,29 +39,64 @@ export function buildJsTreeData(features) {
 }
 
 export function initializeJsTree(subtypeEntityMap, treeData) {
-  $('#jstree-panel').jstree('destroy');
-  $('#jstree-panel').jstree({
-    'core': { 'data': treeData, 'themes': { 'stripes': true } },
-    'plugins': ["checkbox"]
+  const $tree = $('#jstree-panel');
+  
+
+  $tree.jstree('destroy').empty();
+  
+
+  $tree.jstree({
+    'core': { 
+      'data': treeData,
+      'themes': { 
+        'stripes': true,
+        'dots': true
+      },
+      'check_callback': true
+    },
+    'plugins': ["checkbox", "wholerow"]
   });
 
-  $('#jstree-panel').on('changed.jstree', function (e, data) {
+
+  $tree.on('changed.jstree', function (e, data) {
     const visibleSubtypes = new Set();
+    
+
     data.selected.forEach(id => {
       if (id.includes("subtype:")) {
-        const subtype = id.split("subtype:")[1].toLowerCase();
+        const subtype = id.split("subtype:").pop().toLowerCase();
         visibleSubtypes.add(subtype);
       }
     });
 
+    // Update entity visibility
     for (const subtype in subtypeEntityMap) {
       const visible = visibleSubtypes.size === 0 || visibleSubtypes.has(subtype);
-      subtypeEntityMap[subtype].forEach(ent => ent.show = visible);
+      const entities = subtypeEntityMap[subtype];
+      if (entities && Array.isArray(entities)) {
+        entities.forEach(ent => {
+          if (ent && ent.show !== undefined) {
+            ent.show = visible;
+          }
+        });
+      }
     }
   });
 
-  // Show all by default
-  for (const subtype in subtypeEntityMap) {
-    subtypeEntityMap[subtype].forEach(ent => ent.show = true);
-  }
+
+  $tree.on('ready.jstree', function() {
+
+    for (const subtype in subtypeEntityMap) {
+      const entities = subtypeEntityMap[subtype];
+      if (entities && Array.isArray(entities)) {
+        entities.forEach(ent => {
+          if (ent && ent.show !== undefined) {
+            ent.show = true;
+          }
+        });
+      }
+    }
+    
+
+  });
 }

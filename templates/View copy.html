@@ -639,18 +639,44 @@ async function processGeoJSON(data) {
   </div>
 
   <!-- GeoJSON from backend -->
-  <script>
+  <!-- <script>
     const inputGeojson = {{ geojson_data | safe }};
-  </script>
+  </script> -->
 
   <!-- Load JS modules correctly from FastAPI static path -->
-  <script type="module">
+  <!-- <script type="module">
     import { initializeViewer } from "{{ url_for('static', path='/viewer.js') }}";
     import { processGeoJSON } from "{{ url_for('static', path='/geojsonLoader.js') }}";
 
     const viewer = await initializeViewer();
     await processGeoJSON(inputGeojson, viewer);
-  </script>
+  </script> -->
+
+  <script type="module">
+  import { initializeViewer } from "{{ url_for('static', path='/viewer.js') }}";
+  import { processGeoJSON } from "{{ url_for('static', path='/geojsonLoader.js') }}";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const geojsonUrl = urlParams.get('url');
+  
+  async function loadData() {
+    let geojsonData;
+    
+    if (geojsonUrl) {
+      // Load from URL
+      const response = await fetch(geojsonUrl);
+      geojsonData = await response.json();
+    } else {
+      // Use embedded data
+      geojsonData = {{ geojson_data | safe }};
+    }
+    
+    const viewer = await initializeViewer();
+    await processGeoJSON(geojsonData, viewer);
+  }
+  
+  loadData();
+</script>
 </body>
 </html>
 

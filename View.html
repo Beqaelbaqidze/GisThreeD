@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>3D GeoJSON Viewer</title>
+
+  <!-- Cesium + jstree dependencies -->
+   <link rel="stylesheet" href="tree.css">
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
+
+</head>
+<body>
+  <div id="loading">Loading GeoJSON...</div>
+  <div id="error"></div>
+  
+  <div id="mainContainer">
+    <div id="sidebar">
+      <h4>GeoJSON Structure</h4>
+      <div id="jstree-panel"></div>
+    </div>
+    <div id="cesiumContainer"></div>
+    <div id="selectionInfo" style="position: absolute; top: 10px; right: 10px; background: white; padding: 15px; border-radius: 5px; max-width: 300px; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1000;">
+  <button id="closeInfo" style="position: absolute; top: 5px; right: 5px; border: none; background: none; font-size: 18px; cursor: pointer;">&times;</button>
+  <div id="infoContent"></div>
+</div>
+    
+  </div>
+<script type="module">
+  import { initializeViewer, setupClickHandler, resetSelection } from "./viewer.js";
+  import { processGeoJSON } from "./geojsonLoader.js";
+
+  const loading = document.getElementById('loading');
+  const errorDiv = document.getElementById('error');
+  const geojsonUrl = 'unit_polygon.geojson';
+  
+  async function loadAndDisplay() {
+    try {
+      loading.style.display = 'block';
+      
+      // Fetch GeoJSON
+      const response = await fetch(geojsonUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GeoJSON: ${response.status} ${response.statusText}`);
+      }
+      
+      const geojsonData = await response.json();
+      
+      // Initialize viewer and process data
+      const viewer = await initializeViewer();
+      window.cesiumViewer = viewer;
+      await processGeoJSON(geojsonData, viewer);
+      
+      // Get info panel elements
+      const selectionInfo = document.getElementById('selectionInfo');
+      const infoContent = document.getElementById('infoContent');
+      const closeInfo = document.getElementById('closeInfo');
+      
+      // Close button handler
+      closeInfo.addEventListener('click', () => {
+        selectionInfo.style.display = 'none';
+        resetSelection(viewer);
+      });
+      
+      // Setup click handler with callback
+      const handler = setupClickHandler(viewer, (entity, matchCount) => {
+        console.log(`Selected ${matchCount} similar entities`);
+        
+        // Get all properties
+        let propertiesHtml = '';
+        if (entity.properties) {
+          const propertyNames = entity.properties.propertyNames;
+          propertyNames.forEach(propertyName => {
+            const value = entity.properties[propertyName].getValue();
+            propertiesHtml += `<p><strong>${propertyName}:</strong> ${value}</p>`;
+          });
+        }
+        
+        // Display info
+        infoContent.innerHTML = `
+          <h3>Selection Info</h3>
+          <p style="background: #ffffcc; padding: 5px; border-radius: 3px;">
+            <strong>Total Selected:</strong> ${matchCount} entities
+          </p>
+          <hr>
+          <h4>Matching Criteria:</h4>
+          <p><strong>REG_N:</strong> ${entity.properties.REG_N?.getValue()}</p>
+          <p><strong>FLOOR:</strong> ${entity.properties.FLOOR?.getValue()}</p>
+          <p><strong>BULDING_ID:</strong> ${entity.properties.BULDING_ID?.getValue()}</p>
+          <hr>
+          <h4>All Properties:</h4>
+          ${propertiesHtml}
+        `;
+        
+        selectionInfo.style.display = 'block';
+      });
+      
+      loading.style.display = 'none';
+      
+    } catch (error) {
+      console.error('Error:', error);
+      loading.style.display = 'none';
+      errorDiv.textContent = error.message;
+      errorDiv.style.display = 'block';
+    }
+  }
+  
+  loadAndDisplay();
+</script>
+</body>
+</html>

@@ -9,7 +9,9 @@ export async function processGeoJSON(data, viewer) {
 
   viewer.scene.globe.depthTestAgainstTerrain = true;
   viewer.dataSources.add(dataSource);
-  viewer.zoomTo(dataSource);
+  viewer.flyTo(dataSource, {
+  duration: 1  // seconds (default is 3)
+});
 
   const entities = dataSource.entities.values;
   const groupedEntities = {};
